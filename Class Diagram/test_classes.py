@@ -1,15 +1,13 @@
 from datetime import datetime, timedelta
-import sys
-import os
 
-# Add the directory containing Class.py to the python path
-sys.path.append(os.path.join(os.getcwd(), 'Class Diagram'))
-
-try:
-    from Class import Client, Barber, Service, Availability, Appointment, Payment, Review, Notification
-except ImportError as e:
-    print(f"Error importing classes: {e}")
-    sys.exit(1)
+from client import Client
+from barber import Barber
+from service import Service
+from availability import Availability
+from appointment import Appointment
+from payment import Payment
+from review import Review
+from notification import Notification
 
 def test_barber_shop_flow():
     print("--- Starting Barber Shop Flow Test ---")
