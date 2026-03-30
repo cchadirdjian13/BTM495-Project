@@ -71,6 +71,8 @@ npm install
 # Start the React development server
 npm run dev
 ```
+*(Note for Windows users: If you get a PowerShell script execution error, try running `cmd /c npm run dev` instead).*
+
 *The frontend will run at `http://localhost:5173`. Any API calls to `/api` are automatically proxied to the Flask server.*
 
 ---
