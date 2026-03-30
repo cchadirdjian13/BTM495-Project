@@ -1,6 +1,6 @@
 /* ============================================================
    Global Design System — Barber Shop Appointment System
-   Palette: Deep charcoal + Gold (#c9a84c) luxury dark theme
+   Palette: Pure Black + Gold (#d4af37) luxury dark theme
    Font: Playfair Display (headings) + Inter (body)
    ============================================================ */
 
@@ -8,15 +8,15 @@
 
 /* ---------- Tokens ---------- */
 :root {
-  --bg:        #0d0d14;
-  --surface:   #16161f;
-  --surface2:  #1e1e2a;
-  --border:    rgba(255,255,255,0.07);
-  --gold:      #c9a84c;
-  --gold-light:#e8c875;
-  --gold-dim:  rgba(201,168,76,0.15);
-  --text:      #e8e8f0;
-  --muted:     #888899;
+  --bg:        #000000; /* Pure black background */
+  --surface:   #0a0a0c; /* Very dark gray for primary cards */
+  --surface2:  #141418; /* Slightly lighter gray for toggles/inputs */
+  --border:    rgba(212,175,55,0.18); /* Faint gold borders instead of white */
+  --gold:      #d4af37; /* Classic metallic gold */
+  --gold-light:#f1d570;
+  --gold-dim:  rgba(212,175,55,0.15);
+  --text:      #f0f0f0;
+  --muted:     #888888;
   --danger:    #e05c5c;
   --success:   #5cc98e;
   --warning:   #e0a44a;
@@ -25,8 +25,8 @@
   --radius:    14px;
   --radius-lg: 22px;
 
-  --shadow:    0 4px 24px rgba(0,0,0,0.45);
-  --glow:      0 0 24px rgba(201,168,76,0.18);
+  --shadow:    0 4px 24px rgba(0,0,0,0.8);
+  --glow:      0 0 24px rgba(212,175,55,0.25);
   --transition: 0.22s ease;
 }
 
@@ -65,6 +65,22 @@ a { color: var(--gold); text-decoration: none; }
   border-radius: var(--radius);
 }
 
+/* ---------- Tabs ---------- */
+.tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); }
+.tab-btn { background: transparent; border: none; color: var(--muted); font-size: 1rem; font-weight: 500; padding: 0.8rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition); }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ---------- Analytics Charts ---------- */
+.bar-chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 200px; padding-top: 1rem; border-bottom: 1px solid var(--border); }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.chart-bar { width: 34px; background: linear-gradient(to top, var(--gold), var(--gold-light)); border-radius: 4px 4px 0 0; transition: height 0.6s ease; box-shadow: 0 0 10px rgba(212,175,55,0.2); }
+.chart-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; text-align: center; }
+.chart-value { font-size: 0.75rem; font-weight: bold; margin-bottom: 0.3rem; color: var(--gold-light); text-align: center; }
+
+.progress-wrap { width: 100%; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; margin-top: 0.4rem; }
+.progress-fill { height: 100%; background: linear-gradient(to right, var(--gold), var(--gold-light)); border-radius: 4px; transition: width 0.6s ease; }
+
 .gold-text { color: var(--gold); }
 .muted { color: var(--muted); font-size: 0.85rem; }
 
@@ -82,9 +98,9 @@ button, .btn {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold), #a07830);
-  color: #0d0d14;
-  box-shadow: 0 2px 12px rgba(201,168,76,0.3);
+  background: linear-gradient(135deg, var(--gold), #8f7422);
+  color: #000000;
+  box-shadow: 0 2px 12px rgba(212,175,55,0.35);
 }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--glow); }
 .btn-primary:active { transform: translateY(0); }
@@ -147,7 +163,7 @@ select option { background: var(--surface2); }
   text-transform: uppercase;
 }
 .badge-confirmed  { background: rgba(92,201,142,0.15); color: var(--success); border: 1px solid rgba(92,201,142,0.3); }
-.badge-scheduled  { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+.badge-scheduled  { background: rgba(212,175,55,0.15); color: var(--gold); border: 1px solid rgba(212,175,55,0.3); }
 .badge-completed  { background: rgba(136,136,153,0.15); color: var(--muted); border: 1px solid rgba(136,136,153,0.2); }
 .badge-cancelled  { background: rgba(224,92,92,0.12); color: var(--danger); border: 1px solid rgba(224,92,92,0.2); }
 
@@ -159,7 +175,7 @@ select option { background: var(--surface2); }
   padding: 1.4rem;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
-.card:hover { border-color: rgba(201,168,76,0.2); box-shadow: var(--shadow); }
+.card:hover { border-color: rgba(212,175,55,0.4); box-shadow: var(--shadow); }
 
 /* ---------- Dashboard Layout ---------- */
 .dashboard-layout {
@@ -379,7 +395,7 @@ select option { background: var(--surface2); }
   cursor: pointer;
   transition: all var(--transition);
 }
-.service-card:hover { border-color: rgba(201,168,76,0.4); box-shadow: var(--shadow); }
+.service-card:hover { border-color: rgba(212,175,55,0.6); box-shadow: var(--shadow); }
 .service-card.selected { border-color: var(--gold); background: var(--gold-dim); }
 .service-card h3 { font-size: 1rem; margin-bottom: 0.4rem; }
 .service-card .service-meta { display: flex; justify-content: space-between; margin-top: 0.8rem; }
@@ -390,14 +406,14 @@ select option { background: var(--surface2); }
 .landing-bg {
   min-height: 100vh;
   display: flex;
-  background: var(--bg);
+  background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 100%), url('/images/hero.png') center/cover no-repeat fixed;
   position: relative;
   overflow: hidden;
 }
 .landing-glow {
   position: absolute;
   width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%);
   top: -100px; right: -100px;
   pointer-events: none;
 }

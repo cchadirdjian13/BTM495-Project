@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { appointmentsAPI, paymentsAPI, reviewsAPI } from '../api/api'
 import AppointmentCard from '../components/AppointmentCard'
 import BookingModal from '../components/BookingModal'
@@ -30,11 +31,16 @@ export default function ClientDashboard() {
   return (
     <div className="main-content">
       <div className="page-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-        <div>
-          <h1>My Appointments</h1>
-          <p>Track and manage your upcoming barber shop visits.</p>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', color: 'var(--gold)', border: '2px solid var(--border)' }}>
+            {useAuth().user?.name?.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h1 style={{ marginBottom: '0.2rem' }}>Hi, {useAuth().user?.name.split(' ')[0]}</h1>
+            <p className="muted" style={{ margin: 0 }}>Track and manage your upcoming barber shop visits.</p>
+          </div>
         </div>
-        <button className="btn btn-primary" onClick={() => setBooking(true)}>
+        <button className="btn btn-primary" onClick={() => setBooking(true)} style={{ alignSelf: 'center' }}>
           + Book New Cut
         </button>
       </div>
@@ -107,49 +113,79 @@ export default function ClientDashboard() {
 
 function PaymentModal({ appt, onClose, onSuccess }) {
   const [method, setMethod] = useState('Credit Card')
-  const [busy, setBusy]     = useState(false)
+  const [step, setStep]     = useState('form') // 'form' | 'processing' | 'success'
 
   const pay = async () => {
-    setBusy(true)
+    setStep('processing')
     try {
+      // Small artificial delay to show off the cool processing state
+      await new Promise(r => setTimeout(r, 1200))
       await paymentsAPI.pay({ appointment_id: appt.appointment_id, amount: appt.service.price, method })
-      onSuccess()
+      setStep('success')
     } catch(e) {
       alert(e.message)
-      setBusy(false)
+      setStep('form')
     }
   }
 
   return (
-    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
-      <div className="modal" style={{ maxWidth: 400 }}>
-        <h2>Complete Payment</h2>
-        <div style={{ margin:'1.5rem 0', background:'var(--surface2)', padding:'1rem', borderRadius:'var(--radius-sm)' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.5rem' }}>
-            <span className="muted">{appt.service.name}</span>
-            <span>${appt.service.price.toFixed(2)}</span>
-          </div>
-          <div style={{ display:'flex', justifyContent:'space-between', fontWeight:600, borderTop:'1px solid var(--border)', paddingTop:'0.5rem' }}>
-            <span>Total</span>
-            <span className="gold-text">${appt.service.price.toFixed(2)}</span>
-          </div>
-        </div>
+    <div className="modal-overlay" onClick={e => step !== 'processing' && e.target===e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: 400, textAlign: step === 'form' ? 'left' : 'center' }}>
+        
+        {step === 'form' && (
+          <>
+            <h2>Complete Payment</h2>
+            <div style={{ margin:'1.5rem 0', background:'var(--surface2)', padding:'1rem', borderRadius:'var(--radius-sm)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.5rem' }}>
+                <span className="muted">{appt.service.name}</span>
+                <span>${appt.service.price.toFixed(2)}</span>
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', fontWeight:600, borderTop:'1px solid var(--border)', paddingTop:'0.5rem' }}>
+                <span>Total</span>
+                <span className="gold-text">${appt.service.price.toFixed(2)}</span>
+              </div>
+            </div>
 
-        <div className="form-group">
-          <label>Payment Method</label>
-          <select value={method} onChange={e => setMethod(e.target.value)}>
-            <option>Credit Card</option>
-            <option>Debit Card</option>
-            <option>Cash (In-person)</option>
-          </select>
-        </div>
+            <div className="form-group">
+              <label>Payment Method</label>
+              <select value={method} onChange={e => setMethod(e.target.value)}>
+                <option>Credit Card</option>
+                <option>Debit Card</option>
+                <option>Cash (In-person)</option>
+              </select>
+            </div>
 
-        <div style={{ display:'flex', gap:'1rem', marginTop:'2rem' }}>
-          <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose} disabled={busy}>Cancel</button>
-          <button className="btn btn-primary" style={{ flex:1 }} onClick={pay} disabled={busy}>
-            {busy ? 'Processing...' : `Pay $${appt.service.price.toFixed(2)}`}
-          </button>
-        </div>
+            <div style={{ display:'flex', gap:'1rem', marginTop:'2rem' }}>
+              <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" style={{ flex:1 }} onClick={pay}>
+                Pay ${appt.service.price.toFixed(2)}
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 'processing' && (
+          <div style={{ padding: '3rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              width: 50, height: 50, border: '4px solid var(--surface2)',
+              borderTopColor: 'var(--gold)', borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+            <h3 style={{ marginTop: '1rem' }}>Processing Payment...</h3>
+            <p className="muted">Securely contacting {method.toLowerCase()} provider</p>
+          </div>
+        )}
+
+        {step === 'success' && (
+          <div style={{ padding: '2rem 0', animation: 'fadeIn 0.4s ease' }}>
+            <div style={{ fontSize: '4rem', color: 'var(--gold)', marginBottom: '1rem' }}>✓</div>
+            <h2 style={{ marginBottom: '0.5rem' }}>Payment Successful!</h2>
+            <p className="muted" style={{ marginBottom: '2rem' }}>Thank you. Your receipt has been logged.</p>
+            <button className="btn btn-primary btn-block" onClick={onSuccess}>Done</button>
+          </div>
+        )}
+
       </div>
     </div>
   )

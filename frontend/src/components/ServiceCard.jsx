@@ -24,12 +24,14 @@ export function BarberCard({ barber, selected, onClick }) {
     >
       <div style={{ display:'flex', alignItems:'center', gap:'0.8rem' }}>
         <div style={{
-          width:44, height:44, borderRadius:'50%',
-          background:'linear-gradient(135deg,var(--gold),#6b4a10)',
+          width:52, height:52, borderRadius:'50%', overflow: 'hidden',
+          background:'linear-gradient(135deg,var(--gold),#8f7422)',
           display:'flex', alignItems:'center', justifyContent:'center',
-          fontSize:'1.2rem', flexShrink:0,
+          fontSize:'1.2rem', flexShrink:0, border: '2px solid var(--gold)'
         }}>
-          ✂
+          {barber.user_id <= 3 ? 
+            <img src={`/images/avatar_${barber.user_id}.png`} alt={barber.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : '✂'}
         </div>
         <div>
           <div style={{ fontWeight:600 }}>{barber.name}</div>
