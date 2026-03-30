@@ -1,0 +1,70 @@
+import { appointmentsAPI } from '../api/api'
+
+const STATUS_CLASS = {
+  Confirmed:  'badge-confirmed',
+  Scheduled:  'badge-scheduled',
+  Completed:  'badge-completed',
+  Cancelled:  'badge-cancelled',
+}
+
+export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, onPay }) {
+  const fmt = (iso) => new Date(iso).toLocaleString('en-US', {
+    weekday:'short', month:'short', day:'numeric',
+    hour:'2-digit', minute:'2-digit',
+  })
+
+  const action = async (fn) => { try { await fn(); onRefresh() } catch(e){ alert(e.message) } }
+
+  const canCancel  = ['Scheduled','Confirmed'].includes(appt.status)
+  const canConfirm = isBarber && appt.status === 'Scheduled'
+  const canComplete= isBarber && appt.status === 'Confirmed'
+  const canPay     = !isBarber && appt.status === 'Confirmed' && appt.payments.length === 0
+  const canReview  = !isBarber && appt.status === 'Completed'
+
+  return (
+    <div className="card" style={{ display:'flex', flexDirection:'column', gap:'0.8rem' }}>
+      {/* Header */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div>
+          <h3 style={{ fontSize:'1.05rem' }}>{appt.service.name}</h3>
+          <div className="muted" style={{ marginTop:'0.2rem' }}>
+            {isBarber ? `Client: ${appt.client.name}` : `Barber: ${appt.barber.name}`}
+          </div>
+        </div>
+        <span className={`badge ${STATUS_CLASS[appt.status] || ''}`}>{appt.status}</span>
+      </div>
+
+      {/* Details */}
+      <div style={{ display:'flex', gap:'1.2rem', flexWrap:'wrap' }}>
+        <Detail icon="📅" text={fmt(appt.datetime)} />
+        <Detail icon="💈" text={`${appt.service.duration} min`} />
+        <Detail icon="💰" text={`$${appt.service.price.toFixed(2)}`} />
+      </div>
+
+      {/* Payment info */}
+      {appt.payments.length > 0 && (
+        <div style={{ background:'var(--surface2)', borderRadius:'var(--radius-sm)', padding:'0.6rem 0.9rem', fontSize:'0.82rem' }}>
+          💳 {appt.payments[0].method} — ${appt.payments[0].amount.toFixed(2)}
+          <span style={{ marginLeft:'0.6rem', color:'var(--success)' }}>Paid</span>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', marginTop:'0.2rem' }}>
+        {canConfirm  && <button className="btn btn-success btn-sm" onClick={() => action(() => appointmentsAPI.confirm (appt.appointment_id))}>✓ Confirm</button>}
+        {canComplete && <button className="btn btn-primary btn-sm" onClick={() => action(() => appointmentsAPI.complete(appt.appointment_id))}>✔ Complete</button>}
+        {canPay      && <button className="btn btn-primary btn-sm" onClick={() => onPay(appt)}>💳 Pay</button>}
+        {canReview   && <button className="btn btn-ghost  btn-sm" onClick={() => onReview(appt)}>⭐ Review</button>}
+        {canCancel   && <button className="btn btn-danger  btn-sm" onClick={() => action(() => appointmentsAPI.cancel (appt.appointment_id))}>✕ Cancel</button>}
+      </div>
+    </div>
+  )
+}
+
+function Detail({ icon, text }) {
+  return (
+    <span style={{ fontSize:'0.82rem', color:'var(--muted)', display:'flex', alignItems:'center', gap:'0.3rem' }}>
+      {icon} {text}
+    </span>
+  )
+}
