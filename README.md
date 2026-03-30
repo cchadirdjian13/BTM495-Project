@@ -11,7 +11,7 @@ The application is built combining a sleek, glassmorphic React frontend with a l
 The project is split into three main layers:
 
 1. **`Class Diagram/` (Core Business Logic)**
-   This directory houses the foundational domain-driven Python classes (`Client`, `Barber`, `Appointment`, `Payment`, `Service`, `Availability`, `Notification`, etc.). All core logic for managing the shop is strictly maintained here. 
+   This directory houses the foundational domain-driven Python classes. It has been completely modularized so that each class (`client.py`, `barber.py`, `appointment.py`, etc.) lives in its own dedicated file rather than a single monolith. It also includes a `test_classes.py` suite and a `main.py` script to test and demonstrate the core logic independently of the web application.
 
 2. **`backend/` (Flask REST API)**
    A lightweight Flask API (`app.py`) serves as the bridge between the frontend web client and the backend Python classes. It uses an in-memory datastore (`state.py`) to hold all class instances. It features clean HTTP endpoints for authentication, fetching data, and mutating system state.
