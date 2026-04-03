@@ -51,6 +51,8 @@ class Appointment(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(50), default='Scheduled') # Scheduled, Confirmed, Completed, Cancelled
+    reminder_sent = db.Column(db.Boolean, default=False)
+    review_prompt_sent = db.Column(db.Boolean, default=False)
     
     service = db.relationship('Service')
     payments = db.relationship('Payment', backref='appointment', lazy=True)
@@ -81,5 +83,6 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     message = db.Column(db.String(255), nullable=False)
+    channel = db.Column(db.String(20), default='IN_APP') # IN_APP, SMS, EMAIL
     is_read = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

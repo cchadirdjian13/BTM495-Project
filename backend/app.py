@@ -8,12 +8,16 @@ import os
 from datetime import datetime, timedelta, date
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
+from flask_apscheduler import APScheduler
 
 from .database import db
 from .models import User, Service, Availability, Appointment, Payment, Review, Notification
+from .notifications import send_sms, send_email
 
 app = Flask(__name__)
 app.secret_key = "barber-shop-secret-2026"
+
+scheduler = APScheduler()
 
 # Configure SQLite Database
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -491,6 +495,64 @@ def mark_all_read():
     return ok()
 
 
+# ── NOTIFICATION TRIGGERS (SMS & EMAIL) ──────────────────────────────
+
+def trigger_notifications():
+    """
+    Checks for appointments that need notification:
+    1. Reminders for upcoming appointments within 24 hours.
+    2. Review prompts for completed appointments older than 1 hour.
+    """
+    now = datetime.utcnow()
+    
+    # 1. Reminders (24 hours before) - For 'Confirmed' appointments
+    tomorrow = now + timedelta(hours=24)
+    upcoming = Appointment.query.filter(
+        Appointment.datetime <= tomorrow,
+        Appointment.datetime >= now,
+        Appointment.status == 'Confirmed',
+        Appointment.reminder_sent == False
+    ).all()
+    
+    for appt in upcoming:
+        msg = f"Reminder: Your appointment with {appt.barber.name} is on {appt.datetime.strftime('%b %d at %H:%M')}. Reply CONFIRM or CANCEL."
+        send_sms(appt.client_id, appt.client.phone, msg)
+        send_email(appt.client_id, appt.client.email, "Appointment Reminder", msg)
+        appt.reminder_sent = True
+        
+    # 2. Review Prompts (1 hour after completion) - For 'Completed' appointments
+    past_1h = now - timedelta(hours=1)
+    recently_completed = Appointment.query.filter(
+        Appointment.datetime <= past_1h,
+        Appointment.status == 'Completed',
+        Appointment.review_prompt_sent == False
+    ).all()
+    
+    for appt in recently_completed:
+        msg = f"Hope you enjoyed your service with {appt.barber.name}! Leave a review here: http://localhost:5173/reviews/{appt.barber_id}"
+        send_sms(appt.client_id, appt.client.phone, msg)
+        send_email(appt.client_id, appt.client.email, "How was your haircut?", msg)
+        appt.review_prompt_sent = True
+        
+    db.session.commit()
+    return len(upcoming) + len(recently_completed)
+
+
+@app.route("/api/demo/trigger-notifications", methods=["POST"])
+def manual_trigger_notifications():
+    """Manually trigger the notification logic for demonstration purposes."""
+    count = trigger_notifications()
+    return ok({"notifications_sent": count})
+
+
+@scheduler.task('interval', id='do_notifications', minutes=5)
+def scheduled_notifications():
+    """Automatically run notification check every 5 minutes."""
+    with app.app_context():
+        trigger_notifications()
+
+
+
 # ══════════════════════════════════════════════════════════════════════
 # DATABASE SEEDING
 # ══════════════════════════════════════════════════════════════════════
@@ -545,6 +607,11 @@ def create_app():
     with app.app_context():
         db.create_all()
         seed_db()
+    
+    if not scheduler.running:
+        scheduler.init_app(app)
+        scheduler.start()
+        
     return app
 
 if __name__ == "__main__":
