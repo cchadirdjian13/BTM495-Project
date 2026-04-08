@@ -31,7 +31,7 @@ export default function BookingModal({ onClose, onBooked }) {
         slot_id:    selectedSlot.slot_id,
         datetime:   dt.toISOString(),
       })
-      onBooked()
+      setStep(5)
     } catch(e) {
       setError(e.message)
       setLoading(false)
@@ -124,6 +124,43 @@ export default function BookingModal({ onClose, onBooked }) {
                 {loading ? (language === 'fr' ? 'Réservation...' : 'Booking…') : `✓ ${t('confirm_booking')}`}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Step 5: Success Animation */}
+        {step === 5 && (
+          <div className="success-animation-container">
+            <div className="scissor-anim-wrapper">
+              <svg viewBox="0 0 120 120" className="scissor-svg">
+                <defs>
+                  <mask id="draw-mask">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="white" strokeWidth="12" className="mask-progress" />
+                  </mask>
+                </defs>
+                <circle cx="60" cy="60" r="50" className="circle-bg" />
+                <circle cx="60" cy="60" r="50" className="circle-dashed" mask="url(#draw-mask)" />
+                <circle cx="60" cy="60" r="50" className="circle-solid" />
+                
+                <g className="scissors-group">
+                  <svg x="98" y="48" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="scissor-icon">
+                    <circle cx="6" cy="6" r="3" />
+                    <circle cx="6" cy="18" r="3" />
+                    <line x1="20" y1="4" x2="8.12" y2="15.88" />
+                    <line x1="14.47" y1="14.48" x2="20" y2="20" />
+                    <line x1="8.12" y1="8.12" x2="12" y2="12" />
+                  </svg>
+                </g>
+                
+                <polyline points="40,65 55,80 85,45" className="checkmark" />
+              </svg>
+            </div>
+            <h3>{t('booking_success')}</h3>
+            <p className="muted" style={{ marginBottom: '2rem' }}>
+              {t('date')}: {selectedSlot.date} • {t('time')}: {selectedSlot.start_time}
+            </p>
+            <button className="btn btn-primary btn-block" onClick={onBooked}>
+              {t('done')}
+            </button>
           </div>
         )}
       </div>
