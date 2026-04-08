@@ -14,12 +14,12 @@ The project is split into three main layers:
    This directory houses the foundational domain-driven Python classes. It has been completely modularized so that each class (`client.py`, `barber.py`, `appointment.py`, etc.) lives in its own dedicated file.
 
 2. **`backend/` (Flask REST API & SQLAlchemy)**
-   A Flask API (`app.py`) serves as the bridge between the frontend web client and the backend. 
+   A Flask API (`app.py`) serves as the bridge between the frontend web client and the backend.
    - **Database Persistence**: The system has been fully migrated from an ephemeral in-memory dictionary to a persistent **SQLite** datastore managed by **Flask-SQLAlchemy** (`database.py` & `models.py`).
    - **Notification Service**: Includes a localized prototype Notification service (`notifications.py`) that simulates the immediate dispatch of SMS and Email alerts when bookings are confirmed or cancelled.
 
 3. **`frontend/` (React + Vite SPA)**
-   The user interface is built as a Single Page Application using React and Vite. 
+   The user interface is built as a Single Page Application using React and Vite.
    - **Modern Aesthetics**: Driven by vanilla CSS showcasing a custom dark luxury theme with dynamically animated elements (such as the interactive circular "scissors cutting" sequence upon booking confirmation).
    - **Localization (i18n)**: Fully synced bilingual support (EN/FR) via a custom `LanguageContext`. The frontend preference binds directly to the backend database, ensuring user notifications are delivered in their preferred language.
 
@@ -28,6 +28,7 @@ The project is split into three main layers:
 ## ✨ Key Features
 
 ### For Clients 👤
+
 - **Discover Services & Barbers**: Browse the available haircut services and view the barber directory.
 - **Smart Booking**: A multi-step wizard to pick a specific barber, a desired service, and an available date/time slot. Success is capped off with a rewarding, smooth SVG/CSS animated scissor cutting sequence.
 - **Bilingual Interface**: Toggle seamlessly between French and English inside the dashboard.
@@ -36,6 +37,7 @@ The project is split into three main layers:
 - **Live Notifications**: Get instant in-app alerts and simulated localized SMS/Email notifications securely processed over the backend.
 
 ### For Barbers ✂️
+
 - **Set Availability**: Define working hours by generating specific time blocks within a given date.
 - **Action Dashboard**: Manage upcoming bookings and manually mark services as `Confirmed` or `Completed`.
 - **Client Management**: Track performance ratings and read feedback submitted by direct clients.
@@ -46,6 +48,7 @@ The project is split into three main layers:
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 Make sure you have both **Python (3.8+)** and **Node.js (LTS)** installed on your machine.
 
 ### 1. Start the Backend API
@@ -58,9 +61,12 @@ pip install flask flask-cors flask-sqlalchemy
 
 # Start the Flask API (auto-seeds the SQLite DB on first run)
 python run.py
+
+*(Note: If you get an error saying 'python' is not recognized, try using 'py' instead)*
 ```
-*The backend server will natively run at `http://localhost:5000`.*
-*(You can optionally execute `python check_db.py` to view the seeded database configurations)*
+
+_The backend server will natively run at `http://localhost:5000`._
+_(You can optionally execute `python check_db.py` to view the seeded database configurations)_
 
 ### 2. Start the Frontend React App
 
@@ -76,9 +82,9 @@ npm install
 npm run dev
 ```
 
-*(Note for Windows users: If you get a PowerShell script execution error, try running `cmd /c npm run dev` instead).*
+_(Note for Windows users: If you get a PowerShell script execution error, try running `cmd /c npm run dev` instead)._
 
-*The frontend will run at `http://localhost:5173`. Any API calls to `/api` are automatically proxied to the Flask server.*
+_The frontend will run at `http://localhost:5173`. Any API calls to `/api` are automatically proxied to the Flask server._
 
 ---
 
@@ -87,16 +93,19 @@ npm run dev
 The backend automatically pre-seeds the SQLite database with user accounts, appointments, and services so you can test the system immediately on a fresh boot.
 
 **Client Account:**
+
 - **Email:** `alice@email.com`
 - **Password:** `demo1234`
 
 **Barber Account:**
+
 - **Email:** `marcus@salondimension.com`
 - **Password:** `demo1234`
 
 ---
 
 ## 🔮 Future Enhancements (Roadmap)
+
 - **Payment Gateway**: The current payment system acts as an integration stub. Hooking into Stripe or Square APIs would enable real transactions.
 - **Role-based Authentication**: Expanding the API with secure JWTs to fully lock down Barber boundaries.
 - **Production Email Sending**: Linking `notifications.py` to an active SMTP server or an API string like SendGrid to blast real emails instead of console logging prototypes.
