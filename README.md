@@ -1,8 +1,8 @@
 # Premium Salon Dimension Appointment System ✂️
 
-A full-stack web application designed to handle the end-to-end booking flow for a high-end salon. It provides dedicated dashboards for both Clients and Stylists, allowing for seamless appointment scheduling, real-time status updates, payments, and reviews. 
+A full-stack web application designed to handle the end-to-end booking flow for a high-end salon. It provides dedicated dashboards for both Clients and Stylists, allowing for seamless appointment scheduling, real-time status updates, payments, integrated notifications, and full bilingual support (English/French).
 
-The application is built combining a sleek, glassmorphic React frontend with a lightweight Flask REST backend, which wraps pure Python business logic objects.
+The application is built combining a sleek, glassmorphic React frontend with a robust Flask REST backend, powered by a persistent SQLite database.
 
 ---
 
@@ -11,13 +11,17 @@ The application is built combining a sleek, glassmorphic React frontend with a l
 The project is split into three main layers:
 
 1. **`Class Diagram/` (Core Business Logic)**
-   This directory houses the foundational domain-driven Python classes. It has been completely modularized so that each class (`client.py`, `barber.py`, `appointment.py`, etc.) lives in its own dedicated file rather than a single monolith. It also includes a `test_classes.py` suite and a `main.py` script to test and demonstrate the core logic independently of the web application.
+   This directory houses the foundational domain-driven Python classes. It has been completely modularized so that each class (`client.py`, `barber.py`, `appointment.py`, etc.) lives in its own dedicated file.
 
-2. **`backend/` (Flask REST API)**
-   A lightweight Flask API (`app.py`) serves as the bridge between the frontend web client and the backend Python classes. It uses an in-memory datastore (`state.py`) to hold all class instances. It features clean HTTP endpoints for authentication, fetching data, and mutating system state.
+2. **`backend/` (Flask REST API & SQLAlchemy)**
+   A Flask API (`app.py`) serves as the bridge between the frontend web client and the backend. 
+   - **Database Persistence**: The system has been fully migrated from an ephemeral in-memory dictionary to a persistent **SQLite** datastore managed by **Flask-SQLAlchemy** (`database.py` & `models.py`).
+   - **Notification Service**: Includes a localized prototype Notification service (`notifications.py`) that simulates the immediate dispatch of SMS and Email alerts when bookings are confirmed or cancelled.
 
 3. **`frontend/` (React + Vite SPA)**
-   The user interface is built as a Single Page Application using React and Vite. It is purely driven by vanilla CSS (`index.css`), showcasing a custom dark luxury theme with gold accents, tailored for the premium aesthetic of a classic salon.
+   The user interface is built as a Single Page Application using React and Vite. 
+   - **Modern Aesthetics**: Driven by vanilla CSS showcasing a custom dark luxury theme with dynamically animated elements (such as the interactive circular "scissors cutting" sequence upon booking confirmation).
+   - **Localization (i18n)**: Fully synced bilingual support (EN/FR) via a custom `LanguageContext`. The frontend preference binds directly to the backend database, ensuring user notifications are delivered in their preferred language.
 
 ---
 
@@ -25,10 +29,11 @@ The project is split into three main layers:
 
 ### For Clients 👤
 - **Discover Services & Barbers**: Browse the available haircut services and view the barber directory.
-- **Smart Booking**: A multi-step wizard to pick a specific barber, a desired service, and an available date/time slot.
+- **Smart Booking**: A multi-step wizard to pick a specific barber, a desired service, and an available date/time slot. Success is capped off with a rewarding, smooth SVG/CSS animated scissor cutting sequence.
+- **Bilingual Interface**: Toggle seamlessly between French and English inside the dashboard.
 - **Manage Appointments**: Keep track of scheduled haircuts, confirm past ones, and securely handle payments.
 - **Leave Reviews**: Share feedback and provide a 1-to-5 star rating on completed appointments.
-- **Live Notifications**: Get instant alerts via the navigation bell when a barber confirms an appointment.
+- **Live Notifications**: Get instant in-app alerts and simulated localized SMS/Email notifications securely processed over the backend.
 
 ### For Barbers ✂️
 - **Set Availability**: Define working hours by generating specific time blocks within a given date.
@@ -42,8 +47,6 @@ The project is split into three main layers:
 
 ### Prerequisites
 Make sure you have both **Python (3.8+)** and **Node.js (LTS)** installed on your machine.
-- Flask, flask-cors
-- npm
 
 ### 1. Start the Backend API
 
@@ -51,12 +54,13 @@ From the root directory of the project, run:
 
 ```bash
 # Install the required Python packages (only once)
-pip install flask flask-cors
+pip install flask flask-cors flask-sqlalchemy
 
-# Start the Flask API
+# Start the Flask API (auto-seeds the SQLite DB on first run)
 python run.py
 ```
-*The backend server will run natively at `http://localhost:5000` and automatically populate with demo accounts.*
+*The backend server will natively run at `http://localhost:5000`.*
+*(You can optionally execute `python check_db.py` to view the seeded database configurations)*
 
 ### 2. Start the Frontend React App
 
@@ -71,6 +75,7 @@ npm install
 # Start the React development server
 npm run dev
 ```
+
 *(Note for Windows users: If you get a PowerShell script execution error, try running `cmd /c npm run dev` instead).*
 
 *The frontend will run at `http://localhost:5173`. Any API calls to `/api` are automatically proxied to the Flask server.*
@@ -79,7 +84,7 @@ npm run dev
 
 ## 🧪 Demo Credentials
 
-The backend automatically pre-seeds the in-memory state with existing users and appointments so you can test the system immediately.
+The backend automatically pre-seeds the SQLite database with user accounts, appointments, and services so you can test the system immediately on a fresh boot.
 
 **Client Account:**
 - **Email:** `alice@email.com`
@@ -89,11 +94,9 @@ The backend automatically pre-seeds the in-memory state with existing users and 
 - **Email:** `marcus@salondimension.com`
 - **Password:** `demo1234`
 
-*(Additional staff accounts generated: `james@salondimension.com` & `diego@salondimension.com` - all use the same password).*
-
 ---
 
 ## 🔮 Future Enhancements (Roadmap)
-- **Database Persistence**: Currently, the application uses an in-memory dictionary. A natural next step is converting `state.py` to use SQLAlchemy/SQLite.
 - **Payment Gateway**: The current payment system acts as an integration stub. Hooking into Stripe or Square APIs would enable real transactions.
 - **Role-based Authentication**: Expanding the API with secure JWTs to fully lock down Barber boundaries.
+- **Production Email Sending**: Linking `notifications.py` to an active SMTP server or an API string like SendGrid to blast real emails instead of console logging prototypes.
