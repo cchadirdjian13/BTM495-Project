@@ -15,7 +15,7 @@ function BarberAnalytics({ appointments }) {
   const cancelRate = totalBookings > 0 ? ((cancelled.length / totalBookings) * 100).toFixed(1) : 0
 
   // 2. Client Retention (Uniques)
-  const uniqueClients = new Set(completed.map(a => a.client.user_id)).size
+  const uniqueClients = new Set(completed.map(a => a.client?.user_id).filter(id => id)).size
 
   // 3. Monthly Breakdowns for Bar Chart
   const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

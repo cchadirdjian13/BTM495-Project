@@ -9,6 +9,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     phone = db.Column(db.String(20))
+    language = db.Column(db.String(5), default='en')
     rating = db.Column(db.Float, default=0.0) # For barbers
     specialties = db.Column(db.String(255))   # Comma separated, for barbers
     

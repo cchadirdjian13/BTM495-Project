@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { authAPI, notificationsAPI } from '../api/api'
+import { useLanguage } from './LanguageContext'
 
 const AuthContext = createContext(null)
 
@@ -8,12 +9,18 @@ export function AuthProvider({ children }) {
   const [loading, setLoading]     = useState(true)
   const [notifications, setNotifs] = useState([])
 
+  const { setLang } = useLanguage()
+
   // Restore session on mount
   useEffect(() => {
     authAPI.me()
-      .then(u => { setUser(u); setLoading(false) })
+      .then(u => { 
+        setUser(u); 
+        setLoading(false);
+        if (u.language) setLang(u.language);
+      })
       .catch(() => setLoading(false))
-  }, [])
+  }, [setLang])
 
   // Poll notifications every 15 s when logged in
   useEffect(() => {
@@ -28,14 +35,16 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const u = await authAPI.login({ email, password })
     setUser(u)
+    if (u.language) setLang(u.language)
     return u
-  }, [])
+  }, [setLang])
 
   const register = useCallback(async (data) => {
     const u = await authAPI.register(data)
     setUser(u)
+    if (u.language) setLang(u.language)
     return u
-  }, [])
+  }, [setLang])
 
   const logout = useCallback(async () => {
     await authAPI.logout()

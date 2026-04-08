@@ -22,7 +22,7 @@ export default function Landing() {
       if (mode === 'login') {
         await login(form.email, form.password)
       } else {
-        await register({ ...form, role })
+        await register({ ...form, role, language })
       }
     } catch (err) {
       setError(err.message)

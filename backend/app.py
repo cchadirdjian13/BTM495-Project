@@ -30,6 +30,37 @@ CORS(app, supports_credentials=True)
 
 # ── helpers ──────────────────────────────────────────────────────────
 
+NOTIF_TRANSLATIONS = {
+    'en': {
+        'book_success': "New appointment booked by {name} on {date}.",
+        'confirm_success': "Your appointment on {date} has been confirmed!",
+        'complete_success': "Your appointment on {date} is complete. Thank you!",
+        'cancel_barber': "Appointment with {name} on {date} was cancelled.",
+        'payment_received': "Payment of ${amount:.2f} received for appointment with {name}.",
+        'review_left': "{name} left you a {rating}-star review!",
+        'reminder': "Reminder: Your appointment with {name} is on {date}. Reply CONFIRM or CANCEL.",
+        'review_prompt': "Hope you enjoyed your service with {name}! Leave a review here: http://localhost:5173/reviews/{id}",
+        'how_was_haircut': "How was your haircut?",
+        'appt_reminder': "Appointment Reminder"
+    },
+    'fr': {
+        'book_success': "Nouveau rendez-vous réservé par {name} le {date}.",
+        'confirm_success': "Votre rendez-on du {date} a été confirmé!",
+        'complete_success': "Votre rendez-vous du {date} est terminé. Merci!",
+        'cancel_barber': "Le rendez-vous avec {name} le {date} a été annulé.",
+        'payment_received': "Paiement de {amount:.2f} $ reçu pour le rendez-vous avec {name}.",
+        'review_left': "{name} vous a laissé un avis de {rating} étoiles!",
+        'reminder': "Rappel: Votre rendez-vous avec {name} est le {date}. Répondez CONFIRM ou CANCEL.",
+        'review_prompt': "J'espère que vous avez apprécié votre service avec {name}! Laissez un avis ici: http://localhost:5173/reviews/{id}",
+        'how_was_haircut': "Comment s'est passée votre coupe?",
+        'appt_reminder': "Rappel de rendez-vous"
+    }
+}
+
+def get_notif_text(key, lang='en', **kwargs):
+    t = NOTIF_TRANSLATIONS.get(lang, NOTIF_TRANSLATIONS['en']).get(key, key)
+    return t.format(**kwargs)
+
 def ok(data=None, status=200):
     return jsonify({"ok": True, "data": data}), status
 
@@ -52,10 +83,21 @@ def require_auth():
     return u, None
 
 
-def push_notification(user_id, message):
+def push_notification(user_id, key, **kwargs):
+    u = User.query.get(user_id)
+    lang = u.language if u else 'en'
+    message = get_notif_text(key, lang, **kwargs)
+    
     n = Notification(user_id=user_id, message=message)
     db.session.add(n)
     db.session.commit()
+    
+    # Also trigger SMS/Email if applicable
+    if u and u.phone:
+        send_sms(u.id, u.phone, message)
+    if u and u.email:
+        send_email(u.id, u.email, "Salon Dimension", message)
+        
     return n
 
 # ── serializers ──────────────────────────────────────────────────────
@@ -67,6 +109,7 @@ def serialise_user(user: User) -> dict:
         "email": user.email,
         "phone": user.phone,
         "role": user.role,
+        "language": user.language,
     }
     if user.role == "barber":
         d["rating"] = round(user.rating, 2) if user.rating else 0.0
@@ -155,7 +198,8 @@ def register():
         email=body["email"].lower(),
         password=body["password"], # In a real app, hash this!
         phone=body["phone"],
-        role=body["role"]
+        role=body["role"],
+        language=body.get("language", "en")
     )
     db.session.add(user)
     db.session.commit()
@@ -163,6 +207,21 @@ def register():
     session["user_id"] = user.id
     session["user_email"] = user.email
     return ok(serialise_user(user), 201)
+
+
+@app.route("/api/auth/language", methods=["PATCH"])
+def update_language():
+    u, e = require_auth()
+    if e: return e
+    
+    body = request.get_json() or {}
+    lang = body.get("language")
+    if lang not in ("en", "fr"):
+        return err("Invalid language")
+        
+    u.language = lang
+    db.session.commit()
+    return ok({"language": u.language})
 
 
 @app.route("/api/auth/login", methods=["POST"])
@@ -320,7 +379,7 @@ def book_appointment():
     db.session.commit()
 
     # Notify the barber
-    push_notification(barber.id, f"New appointment booked by {u.name} on {dt.strftime('%b %d at %H:%M')}.")
+    push_notification(barber.id, 'book_success', name=u.name, date=dt.strftime('%b %d at %H:%M'))
 
     return ok(serialise_appointment(appt), 201)
 
@@ -335,7 +394,7 @@ def confirm_appointment(appt_id):
     appt.status = "Confirmed"
     db.session.commit()
     
-    push_notification(appt.client_id, f"Your appointment on {appt.datetime.strftime('%b %d at %H:%M')} has been confirmed!")
+    push_notification(appt.client_id, 'confirm_success', date=appt.datetime.strftime('%b %d at %H:%M'))
     return ok(serialise_appointment(appt))
 
 
@@ -349,7 +408,7 @@ def complete_appointment(appt_id):
     appt.status = "Completed"
     db.session.commit()
     
-    push_notification(appt.client_id, f"Your appointment on {appt.datetime.strftime('%b %d at %H:%M')} is complete. Thank you!")
+    push_notification(appt.client_id, 'complete_success', date=appt.datetime.strftime('%b %d at %H:%M'))
     return ok(serialise_appointment(appt))
 
 
@@ -371,7 +430,7 @@ def cancel_appointment(appt_id):
         
     db.session.commit()
     
-    push_notification(appt.barber_id, f"Appointment with {appt.client.name} on {appt.datetime.strftime('%b %d at %H:%M')} was cancelled.")
+    push_notification(appt.barber_id, 'cancel_barber', name=appt.client.name, date=appt.datetime.strftime('%b %d at %H:%M'))
     return ok(serialise_appointment(appt))
 
 
@@ -398,7 +457,7 @@ def make_payment():
     db.session.add(pmt)
     db.session.commit()
     
-    push_notification(appt.barber_id, f"Payment of ${body['amount']:.2f} received for appointment with {u.name}.")
+    push_notification(appt.barber_id, 'payment_received', amount=body['amount'], name=u.name)
     return ok(serialise_payment(pmt), 201)
 
 
@@ -449,7 +508,7 @@ def leave_review():
     
     db.session.commit()
     
-    push_notification(barber.id, f"{u.name} left you a {rating}-star review!")
+    push_notification(barber.id, 'review_left', name=u.name, rating=rating)
     return ok(serialise_review(rev), 201)
 
 
@@ -515,9 +574,12 @@ def trigger_notifications():
     ).all()
     
     for appt in upcoming:
-        msg = f"Reminder: Your appointment with {appt.barber.name} is on {appt.datetime.strftime('%b %d at %H:%M')}. Reply CONFIRM or CANCEL."
+        lang = appt.client.language or 'en'
+        msg = get_notif_text('reminder', lang, name=appt.barber.name, date=appt.datetime.strftime('%b %d at %H:%M'))
+        subject = get_notif_text('appt_reminder', lang)
+        
         send_sms(appt.client_id, appt.client.phone, msg)
-        send_email(appt.client_id, appt.client.email, "Appointment Reminder", msg)
+        send_email(appt.client_id, appt.client.email, subject, msg)
         appt.reminder_sent = True
         
     # 2. Review Prompts (1 hour after completion) - For 'Completed' appointments
@@ -529,9 +591,12 @@ def trigger_notifications():
     ).all()
     
     for appt in recently_completed:
-        msg = f"Hope you enjoyed your service with {appt.barber.name}! Leave a review here: http://localhost:5173/reviews/{appt.barber_id}"
+        lang = appt.client.language or 'en'
+        msg = get_notif_text('review_prompt', lang, name=appt.barber.name, id=appt.barber_id)
+        subject = get_notif_text('how_was_haircut', lang)
+        
         send_sms(appt.client_id, appt.client.phone, msg)
-        send_email(appt.client_id, appt.client.email, "How was your haircut?", msg)
+        send_email(appt.client_id, appt.client.email, subject, msg)
         appt.review_prompt_sent = True
         
     db.session.commit()

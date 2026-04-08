@@ -29,19 +29,19 @@ export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, o
       {/* Header */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
         <div>
-          <h3 style={{ fontSize:'1.05rem' }}>{t(appt.service.name)}</h3>
+          <h3 style={{ fontSize:'1.05rem' }}>{t(appt.service?.name) || '---'}</h3>
           <div className="muted" style={{ marginTop:'0.2rem' }}>
-            {isBarber ? `${t('role_client')}: ${appt.client.name}` : `${t('barber')}: ${appt.barber.name}`}
+            {isBarber ? `${t('role_client')}: ${appt.client?.name || '---'}` : `${t('barber')}: ${appt.barber?.name || '---'}`}
           </div>
         </div>
-        <span className={`badge ${STATUS_CLASS[appt.status] || ''}`}>{t(`status_${appt.status.toLowerCase()}`)}</span>
+        <span className={`badge ${STATUS_CLASS[appt.status] || ''}`}>{t(`status_${appt.status?.toLowerCase() || 'unknown'}`)}</span>
       </div>
 
       {/* Details */}
       <div style={{ display:'flex', gap:'1.2rem', flexWrap:'wrap' }}>
         <Detail icon="📅" text={fmt(appt.datetime)} />
-        <Detail icon="💈" text={`${appt.service.duration} min`} />
-        <Detail icon="💰" text={`$${appt.service.price.toFixed(2)}`} />
+        <Detail icon="💈" text={`${appt.service?.duration || 0} min`} />
+        <Detail icon="💰" text={`$${appt.service?.price?.toFixed(2) || '0.00'}`} />
       </div>
 
       {/* Payment info */}

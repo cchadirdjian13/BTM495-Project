@@ -8,15 +8,12 @@ import BookingModal from '../components/BookingModal'
 import RatingStars from '../components/RatingStars'
 
 export default function ClientDashboard() {
+  const { user } = useAuth()
   const [appointments, setAppointments] = useState([])
   const { t } = useLanguage()
   const [booking, setBooking]           = useState(false)
   const [loading, setLoading]           = useState(true)
-
-  // Payment modal state
-  const [payingFor, setPayingFor] = useState(null)
-  
-  // Review modal state
+  const [payingFor, setPayingFor]       = useState(null)
   const [reviewingFor, setReviewingFor] = useState(null)
 
   const load = useCallback(() => {
@@ -28,18 +25,18 @@ export default function ClientDashboard() {
 
   useEffect(() => { load() }, [load])
 
-  const future = appointments.filter(a => ['Scheduled', 'Confirmed'].includes(a.status))
-  const past   = appointments.filter(a => ['Completed', 'Cancelled'].includes(a.status))
+  const future = (appointments || []).filter(a => ['Scheduled', 'Confirmed'].includes(a.status))
+  const past   = (appointments || []).filter(a => ['Completed', 'Cancelled'].includes(a.status))
 
   return (
     <div className="main-content">
       <div className="page-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', color: 'var(--gold)', border: '2px solid var(--border)' }}>
-            {useAuth().user?.name?.charAt(0).toUpperCase()}
+            {user?.name?.charAt(0).toUpperCase() || '?'}
           </div>
           <div>
-            <h1 style={{ marginBottom: '0.2rem' }}>{t('hi')}, {useAuth().user?.name.split(' ')[0]}</h1>
+            <h1 style={{ marginBottom: '0.2rem' }}>{t('welcome')}, {user?.name?.split(' ')[0] || t('role_client')}</h1>
             <p className="muted" style={{ margin: 0 }}>{t('manage_visits')}</p>
           </div>
         </div>

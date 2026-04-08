@@ -27,6 +27,7 @@ export const authAPI = {
   login:    (data)  => post('/auth/login', data),
   logout:   ()      => post('/auth/logout'),
   me:       ()      => get('/auth/me'),
+  updateLanguage: (lang) => patch('/auth/language', { language: lang }),
 }
 
 // ── Services ───────────────────────────────────────────────────────

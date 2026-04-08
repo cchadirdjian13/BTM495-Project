@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { appointmentsAPI, barbersAPI, availabilityAPI } from '../api/api'
 
 import AppointmentCard from '../components/AppointmentCard'
 import RatingStars from '../components/RatingStars'
@@ -8,7 +9,7 @@ import BarberAnalytics from '../components/BarberAnalytics'
 
 export default function BarberDashboard() {
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading]           = useState(true)
   const [reviews, setReviews]           = useState([])
@@ -41,11 +42,11 @@ export default function BarberDashboard() {
             <img src={`/images/avatar_${user.user_id}.png`} alt={user.name} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold)', boxShadow: 'var(--glow)' }} />
           ) : (
             <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', color: 'var(--gold)', border: '2px solid var(--border)' }}>
-              {user?.name?.charAt(0).toUpperCase()}
+              {user?.name?.charAt(0).toUpperCase() || '?'}
             </div>
           )}
           <div>
-            <h1 style={{ marginBottom: '0.2rem' }}>{t('welcome')}, {user?.name.split(' ')[0]}</h1>
+            <h1 style={{ marginBottom: '0.2rem' }}>{t('welcome')}, {user?.name?.split(' ')[0] || t('role_barber')}</h1>
             <p className="muted" style={{ margin: 0 }}>{t('manage_schedule')}</p>
           </div>
         </div>
@@ -126,7 +127,9 @@ export default function BarberDashboard() {
                       <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.2rem' }}>{r.client_name || 'Client'}</div>
                       <RatingStars value={r.rating} readOnly size="1rem" />
                     </div>
-                    <span className="muted" style={{ fontSize:'0.75rem' }}>{new Date(r.timestamp).toLocaleDateString()}</span>
+                    <span className="muted" style={{ fontSize:'0.75rem' }}>
+                      {new Date(r.timestamp).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US')}
+                    </span>
                   </div>
                   <p style={{ fontSize:'0.88rem', fontStyle: 'italic', color:'var(--text)', margin:'0.5rem 0' }}>
                     &quot;{r.comment}&quot;
