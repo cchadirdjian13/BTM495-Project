@@ -1,5 +1,5 @@
 """
-app.py - Flask REST API for the Barber Shop Appointment System.
+app.py - Flask REST API for the Salon Dimension Appointment System.
 
 Now backed by a local SQLite database using Flask-SQLAlchemy instead of in-memory state.
 """
@@ -15,13 +15,13 @@ from .models import User, Service, Availability, Appointment, Payment, Review, N
 from .notifications import send_sms, send_email
 
 app = Flask(__name__)
-app.secret_key = "barber-shop-secret-2026"
+app.secret_key = "salon-dimension-secret-2026"
 
 scheduler = APScheduler()
 
 # Configure SQLite Database
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'barbershop.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'salondimension.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -574,10 +574,10 @@ def seed_db():
     ]
     db.session.add_all(services)
     
-    # 2. Barbers
-    b1 = User(role="barber", name="James Smith", email="james@barbershop.com", password="demo1234", phone="555-0101", rating=5.0, specialties="Classic Cuts,Fades")
-    b2 = User(role="barber", name="Marcus Williams", email="marcus@barbershop.com", password="demo1234", phone="555-0202", specialties="Beard Styling,Hot Towel Shave")
-    b3 = User(role="barber", name="Diego Ramirez", email="diego@barbershop.com", password="demo1234", phone="555-0303", specialties="Fades,Kids Cuts")
+    # 2. Staff (Stylists)
+    b1 = User(role="barber", name="James Smith", email="james@salondimension.com", password="demo1234", phone="555-0101", rating=5.0, specialties="Classic Cuts,Fades")
+    b2 = User(role="barber", name="Marcus Williams", email="marcus@salondimension.com", password="demo1234", phone="555-0202", specialties="Beard Styling,Hot Towel Shave")
+    b3 = User(role="barber", name="Diego Ramirez", email="diego@salondimension.com", password="demo1234", phone="555-0303", specialties="Fades,Kids Cuts")
     db.session.add_all([b1, b2, b3])
     db.session.commit() # Commit to get IDs
     

@@ -1,5 +1,5 @@
 """
-main.py - Entry point for the Barber Shop Appointment System.
+main.py - Entry point for the Salon Dimension Appointment System.
 
 Demonstrates a full end-to-end flow:
   1. Register a barber and a client.
@@ -22,7 +22,7 @@ from notification import Notification
 
 def main():
     print("=" * 55)
-    print("   Barber Shop Appointment System - Demo")
+    print("   Salon Dimension Appointment System - Demo")
     print("=" * 55)
 
     # ------------------------------------------------------------------
@@ -33,7 +33,7 @@ def main():
     barber = manager.register(
         role="barber",
         name="James Smith",
-        email="james@barbershop.com",
+        email="james@salondimension.com",
         password="securepass123",
         phone="555-0101",
     )

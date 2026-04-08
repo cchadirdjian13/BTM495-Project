@@ -1,12 +1,15 @@
 import RatingStars from './RatingStars'
+import { useLanguage } from '../context/LanguageContext'
+
 
 export default function ServiceCard({ service, selected, onClick }) {
+  const { t } = useLanguage()
   return (
     <div
       className={`service-card${selected ? ' selected' : ''}`}
       onClick={onClick}
     >
-      <h3>{service.name}</h3>
+      <h3>{t(service.name)}</h3>
       <div className="service-meta">
         <span className="price">${service.price.toFixed(2)}</span>
         <span className="duration">⏱ {service.duration} min</span>
@@ -16,6 +19,7 @@ export default function ServiceCard({ service, selected, onClick }) {
 }
 
 export function BarberCard({ barber, selected, onClick }) {
+  const { t } = useLanguage()
   return (
     <div
       className={`card${selected ? ' selected' : ''}`}
@@ -36,14 +40,14 @@ export function BarberCard({ barber, selected, onClick }) {
         <div>
           <div style={{ fontWeight:600 }}>{barber.name}</div>
           <div style={{ fontSize:'0.78rem', color:'var(--muted)' }}>
-            {barber.specialties?.join(', ') || 'General Barber'}
+            {barber.specialties?.join(', ') || t('role_barber')}
           </div>
         </div>
       </div>
       <div style={{ display:'flex', alignItems:'center', gap:'0.4rem', marginTop:'0.8rem' }}>
         <RatingStars value={Math.round(barber.rating || 0)} readOnly size="0.95rem" />
         <span style={{ fontSize:'0.8rem', color:'var(--muted)' }}>
-          {barber.rating ? barber.rating.toFixed(1) : 'No reviews'}
+          {barber.rating ? barber.rating.toFixed(1) : t('no_reviews')}
         </span>
       </div>
     </div>

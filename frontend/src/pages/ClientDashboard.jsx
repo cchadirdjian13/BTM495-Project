@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
+
 import { appointmentsAPI, paymentsAPI, reviewsAPI } from '../api/api'
 import AppointmentCard from '../components/AppointmentCard'
 import BookingModal from '../components/BookingModal'
@@ -7,6 +9,7 @@ import RatingStars from '../components/RatingStars'
 
 export default function ClientDashboard() {
   const [appointments, setAppointments] = useState([])
+  const { t } = useLanguage()
   const [booking, setBooking]           = useState(false)
   const [loading, setLoading]           = useState(true)
 
@@ -36,30 +39,30 @@ export default function ClientDashboard() {
             {useAuth().user?.name?.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 style={{ marginBottom: '0.2rem' }}>Hi, {useAuth().user?.name.split(' ')[0]}</h1>
-            <p className="muted" style={{ margin: 0 }}>Track and manage your upcoming barber shop visits.</p>
+            <h1 style={{ marginBottom: '0.2rem' }}>{t('hi')}, {useAuth().user?.name.split(' ')[0]}</h1>
+            <p className="muted" style={{ margin: 0 }}>{t('manage_visits')}</p>
           </div>
         </div>
         <button className="btn btn-primary" onClick={() => setBooking(true)} style={{ alignSelf: 'center' }}>
-          + Book New Cut
+          + {t('book_new_cut')}
         </button>
       </div>
 
       <div className="stats-row">
         <div className="stat-card">
-          <div className="stat-label">Upcoming</div>
+          <div className="stat-label">{t('upcoming')}</div>
           <div className="stat-value gold">{future.length}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Total Visits</div>
+          <div className="stat-label">{t('total_visits')}</div>
           <div className="stat-value">{past.filter(a => a.status === 'Completed').length}</div>
         </div>
       </div>
 
-      <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>Upcoming ({future.length})</h2>
-      {loading ? <p className="muted">Loading...</p> : future.length === 0 ? (
+      <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>{t('upcoming')} ({future.length})</h2>
+      {loading ? <p className="muted">{t('loading')}</p> : future.length === 0 ? (
         <div className="card" style={{ padding:'3rem', textAlign:'center', marginBottom:'3rem' }}>
-          <p className="muted">You have no upcoming appointments.</p>
+          <p className="muted">{t('no_upcoming')}</p>
         </div>
       ) : (
         <div className="grid-2" style={{ marginBottom:'3rem' }}>
@@ -75,9 +78,9 @@ export default function ClientDashboard() {
         </div>
       )}
 
-      <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>Past ({past.length})</h2>
+      <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>{t('past_history')} ({past.length})</h2>
       {past.length === 0 ? (
-        <p className="muted">No past history.</p>
+        <p className="muted">{t('no_past')}</p>
       ) : (
         <div className="grid-2">
           {past.map(a => (
@@ -112,6 +115,7 @@ export default function ClientDashboard() {
 }
 
 function PaymentModal({ appt, onClose, onSuccess }) {
+  const { t } = useLanguage()
   const [method, setMethod] = useState('Credit Card')
   const [step, setStep]     = useState('form') // 'form' | 'processing' | 'success'
 
@@ -134,31 +138,31 @@ function PaymentModal({ appt, onClose, onSuccess }) {
         
         {step === 'form' && (
           <>
-            <h2>Complete Payment</h2>
+            <h2>{t('complete_payment')}</h2>
             <div style={{ margin:'1.5rem 0', background:'var(--surface2)', padding:'1rem', borderRadius:'var(--radius-sm)' }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.5rem' }}>
-                <span className="muted">{appt.service.name}</span>
+                <span className="muted">{t(appt.service.name)}</span>
                 <span>${appt.service.price.toFixed(2)}</span>
               </div>
               <div style={{ display:'flex', justifyContent:'space-between', fontWeight:600, borderTop:'1px solid var(--border)', paddingTop:'0.5rem' }}>
-                <span>Total</span>
+                <span>{t('total')}</span>
                 <span className="gold-text">${appt.service.price.toFixed(2)}</span>
               </div>
             </div>
 
             <div className="form-group">
-              <label>Payment Method</label>
+              <label>{t('payment_method')}</label>
               <select value={method} onChange={e => setMethod(e.target.value)}>
-                <option>Credit Card</option>
-                <option>Debit Card</option>
-                <option>Cash (In-person)</option>
+                <option value="Credit Card">{t('method_credit')}</option>
+                <option value="Debit Card">{t('method_debit')}</option>
+                <option value="Cash (In-person)">{t('method_cash')}</option>
               </select>
             </div>
 
             <div style={{ display:'flex', gap:'1rem', marginTop:'2rem' }}>
-              <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose}>Cancel</button>
+              <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose}>{t('cancel')}</button>
               <button className="btn btn-primary" style={{ flex:1 }} onClick={pay}>
-                Pay ${appt.service.price.toFixed(2)}
+                {t('pay_amount')} ${appt.service.price.toFixed(2)}
               </button>
             </div>
           </>
@@ -172,17 +176,17 @@ function PaymentModal({ appt, onClose, onSuccess }) {
               animation: 'spin 1s linear infinite'
             }} />
             <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-            <h3 style={{ marginTop: '1rem' }}>Processing Payment...</h3>
-            <p className="muted">Securely contacting {method.toLowerCase()} provider</p>
+            <h3 style={{ marginTop: '1rem' }}>{t('processing_payment')}</h3>
+            <p className="muted">{t('secure_contacting')}</p>
           </div>
         )}
 
         {step === 'success' && (
           <div style={{ padding: '2rem 0', animation: 'fadeIn 0.4s ease' }}>
             <div style={{ fontSize: '4rem', color: 'var(--gold)', marginBottom: '1rem' }}>✓</div>
-            <h2 style={{ marginBottom: '0.5rem' }}>Payment Successful!</h2>
-            <p className="muted" style={{ marginBottom: '2rem' }}>Thank you. Your receipt has been logged.</p>
-            <button className="btn btn-primary btn-block" onClick={onSuccess}>Done</button>
+            <h2 style={{ marginBottom: '0.5rem' }}>{t('payment_success')}</h2>
+            <p className="muted" style={{ marginBottom: '2rem' }}>{t('payment_thank_you')}</p>
+            <button className="btn btn-primary btn-block" onClick={onSuccess}>{t('done')}</button>
           </div>
         )}
 
@@ -192,6 +196,7 @@ function PaymentModal({ appt, onClose, onSuccess }) {
 }
 
 function ReviewModal({ appt, onClose, onSuccess }) {
+  const { t } = useLanguage()
   const [rating, setRating]   = useState(5)
   const [comment, setComment] = useState('')
   const [busy, setBusy]       = useState(false)
@@ -210,9 +215,9 @@ function ReviewModal({ appt, onClose, onSuccess }) {
   return (
     <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
       <div className="modal" style={{ maxWidth: 460 }}>
-        <h2 style={{ marginBottom:'0.5rem' }}>Rate Your Experience</h2>
+        <h2 style={{ marginBottom:'0.5rem' }}>{t('rate_experience')}</h2>
         <p className="muted" style={{ marginBottom:'1.5rem' }}>
-          How was your {appt.service.name} with {appt.barber.name}?
+          {t('how_was_your')} {t(appt.service.name)} {t('with')} {appt.barber.name}?
         </p>
 
         <div style={{ display:'flex', justifyContent:'center', margin:'2rem 0' }}>
@@ -220,19 +225,19 @@ function ReviewModal({ appt, onClose, onSuccess }) {
         </div>
 
         <div className="form-group">
-          <label>Feedback (Optional)</label>
+          <label>{t('feedback_optional')}</label>
           <textarea
             rows={4}
-            placeholder="Tell us what you loved..."
+            placeholder={t('placeholder_feedback')}
             value={comment}
             onChange={e => setComment(e.target.value)}
           />
         </div>
 
         <div style={{ display:'flex', gap:'1rem', marginTop:'2rem' }}>
-          <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose} disabled={busy}>Cancel</button>
+          <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose} disabled={busy}>{t('cancel')}</button>
           <button className="btn btn-primary" style={{ flex:1 }} onClick={submit} disabled={busy}>
-            {busy ? 'Submitting...' : 'Submit Review'}
+            {busy ? t('submitting') : t('submit_review')}
           </button>
         </div>
       </div>

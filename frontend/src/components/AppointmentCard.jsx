@@ -1,4 +1,6 @@
 import { appointmentsAPI } from '../api/api'
+import { useLanguage } from '../context/LanguageContext'
+
 
 const STATUS_CLASS = {
   Confirmed:  'badge-confirmed',
@@ -8,7 +10,8 @@ const STATUS_CLASS = {
 }
 
 export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, onPay }) {
-  const fmt = (iso) => new Date(iso).toLocaleString('en-US', {
+  const { language, t } = useLanguage()
+  const fmt = (iso) => new Date(iso).toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US', {
     weekday:'short', month:'short', day:'numeric',
     hour:'2-digit', minute:'2-digit',
   })
@@ -26,12 +29,12 @@ export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, o
       {/* Header */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
         <div>
-          <h3 style={{ fontSize:'1.05rem' }}>{appt.service.name}</h3>
+          <h3 style={{ fontSize:'1.05rem' }}>{t(appt.service.name)}</h3>
           <div className="muted" style={{ marginTop:'0.2rem' }}>
-            {isBarber ? `Client: ${appt.client.name}` : `Barber: ${appt.barber.name}`}
+            {isBarber ? `${t('role_client')}: ${appt.client.name}` : `${t('barber')}: ${appt.barber.name}`}
           </div>
         </div>
-        <span className={`badge ${STATUS_CLASS[appt.status] || ''}`}>{appt.status}</span>
+        <span className={`badge ${STATUS_CLASS[appt.status] || ''}`}>{t(`status_${appt.status.toLowerCase()}`)}</span>
       </div>
 
       {/* Details */}
@@ -45,17 +48,17 @@ export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, o
       {appt.payments.length > 0 && (
         <div style={{ background:'var(--surface2)', borderRadius:'var(--radius-sm)', padding:'0.6rem 0.9rem', fontSize:'0.82rem' }}>
           💳 {appt.payments[0].method} — ${appt.payments[0].amount.toFixed(2)}
-          <span style={{ marginLeft:'0.6rem', color:'var(--success)' }}>Paid</span>
+          <span style={{ marginLeft:'0.6rem', color:'var(--success)' }}>{t('paid')}</span>
         </div>
       )}
 
       {/* Actions */}
       <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', marginTop:'0.2rem' }}>
-        {canConfirm  && <button className="btn btn-success btn-sm" onClick={() => action(() => appointmentsAPI.confirm (appt.appointment_id))}>✓ Confirm</button>}
-        {canComplete && <button className="btn btn-primary btn-sm" onClick={() => action(() => appointmentsAPI.complete(appt.appointment_id))}>✔ Complete</button>}
-        {canPay      && <button className="btn btn-primary btn-sm" onClick={() => onPay(appt)}>💳 Pay</button>}
-        {canReview   && <button className="btn btn-ghost  btn-sm" onClick={() => onReview(appt)}>⭐ Review</button>}
-        {canCancel   && <button className="btn btn-danger  btn-sm" onClick={() => action(() => appointmentsAPI.cancel (appt.appointment_id))}>✕ Cancel</button>}
+        {canConfirm  && <button className="btn btn-success btn-sm" onClick={() => action(() => appointmentsAPI.confirm (appt.appointment_id))}>✓ {t('confirm')}</button>}
+        {canComplete && <button className="btn btn-primary btn-sm" onClick={() => action(() => appointmentsAPI.complete(appt.appointment_id))}>✔ {t('complete')}</button>}
+        {canPay      && <button className="btn btn-primary btn-sm" onClick={() => onPay(appt)}>💳 {t('pay')}</button>}
+        {canReview   && <button className="btn btn-ghost  btn-sm" onClick={() => onReview(appt)}>⭐ {t('leave_review')}</button>}
+        {canCancel   && <button className="btn btn-danger  btn-sm" onClick={() => action(() => appointmentsAPI.cancel (appt.appointment_id))}>✕ {t('cancel_appt')}</button>}
       </div>
     </div>
   )

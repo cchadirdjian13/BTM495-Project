@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { appointmentsAPI, availabilityAPI, barbersAPI } from '../api/api'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
+
 import AppointmentCard from '../components/AppointmentCard'
 import RatingStars from '../components/RatingStars'
 import BarberAnalytics from '../components/BarberAnalytics'
 
 export default function BarberDashboard() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading]           = useState(true)
   const [reviews, setReviews]           = useState([])
@@ -43,33 +45,33 @@ export default function BarberDashboard() {
             </div>
           )}
           <div>
-            <h1 style={{ marginBottom: '0.2rem' }}>Welcome, {user?.name.split(' ')[0]}</h1>
-            <p className="muted" style={{ margin: 0 }}>Manage your schedule, confirm appointments, and track earnings.</p>
+            <h1 style={{ marginBottom: '0.2rem' }}>{t('welcome')}, {user?.name.split(' ')[0]}</h1>
+            <p className="muted" style={{ margin: 0 }}>{t('manage_schedule')}</p>
           </div>
         </div>
         <button className="btn btn-primary" onClick={() => setAddingSlot(true)} style={{ alignSelf: 'center' }}>
-          + Set Availability
+          + {t('set_availability')}
         </button>
       </div>
 
       <div className="tabs">
-        <button className={tab === 'schedule' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('schedule')}>Schedule & Reviews</button>
-        <button className={tab === 'performance' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('performance')}>Performance Analytics</button>
+        <button className={tab === 'schedule' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('schedule')}>{t('tab_schedule')}</button>
+        <button className={tab === 'performance' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('performance')}>{t('tab_performance')}</button>
       </div>
 
       {tab === 'schedule' ? (
         <div style={{ animation: 'fadeIn 0.3s ease' }}>
           <div className="stats-row">
             <div className="stat-card">
-              <div className="stat-label">Upcoming</div>
+              <div className="stat-label">{t('upcoming')}</div>
               <div className="stat-value gold-text">{future.length}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Clients Served</div>
+              <div className="stat-label">{t('clients_served')}</div>
               <div className="stat-value">{past.filter(a => a.status === 'Completed').length}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Avg Rating</div>
+              <div className="stat-label">{t('avg_rating')}</div>
               <div className="stat-value" style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
                 {user?.rating ? user.rating.toFixed(1) : '---'}
                 <RatingStars value={Math.round(user?.rating || 0)} readOnly size="1rem" />
@@ -77,10 +79,10 @@ export default function BarberDashboard() {
             </div>
           </div>
 
-          <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>Action Required ({future.length})</h2>
-          {loading ? <p className="muted">Loading...</p> : future.length === 0 ? (
+          <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>{t('action_required')} ({future.length})</h2>
+          {loading ? <p className="muted">{t('loading')}</p> : future.length === 0 ? (
             <div className="card" style={{ padding:'3rem', textAlign:'center', marginBottom:'3rem' }}>
-              <p className="muted">Your schedule is clear right now.</p>
+              <p className="muted">{t('schedule_clear')}</p>
             </div>
           ) : (
             <div className="grid-2" style={{ marginBottom:'3rem' }}>
@@ -95,9 +97,9 @@ export default function BarberDashboard() {
             </div>
           )}
 
-          <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>Recent History ({past.length})</h2>
+          <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>{t('recent_history')} ({past.length})</h2>
           {past.length === 0 ? (
-            <p className="muted">No past history.</p>
+            <p className="muted">{t('no_past')}</p>
           ) : (
             <div className="grid-2" style={{ marginBottom:'3rem' }}>
               {past.map(a => (
@@ -112,9 +114,9 @@ export default function BarberDashboard() {
           )}
 
           {/* Reviews section */}
-          <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>Recent Client Reviews ({reviews.length})</h2>
+          <h2 style={{ fontSize:'1.2rem', marginBottom:'1.2rem' }}>{t('reviews_title')} ({reviews.length})</h2>
           {reviews.length === 0 ? (
-            <p className="muted">No reviews yet.</p>
+            <p className="muted">{t('no_reviews')}</p>
           ) : (
             <div className="grid-2">
               {reviews.slice(0, 10).map(r => (
@@ -144,6 +146,7 @@ export default function BarberDashboard() {
 }
 
 function AvailabilityModal({ onClose, onSuccess }) {
+  const { t } = useLanguage()
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [start, setStart] = useState('09:00')
   const [end, setEnd]     = useState('09:30')
@@ -163,17 +166,17 @@ function AvailabilityModal({ onClose, onSuccess }) {
   return (
     <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
       <div className="modal" style={{ maxWidth: 420 }}>
-        <h2>Add Availability Block</h2>
-        <p className="muted" style={{ marginBottom:'2rem' }}>Set a window when clients can book you.</p>
+        <h2>{t('add_block')}</h2>
+        <p className="muted" style={{ marginBottom:'2rem' }}>{t('set_window')}</p>
 
         <div className="grid-2">
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
-            <label>Date</label>
+            <label>{t('date')}</label>
             <input type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
           </div>
           
           <div className="form-group">
-            <label>Start Time</label>
+            <label>{t('start_time')}</label>
             <select value={start} onChange={e => setStart(e.target.value)}>
               {[...Array(24)].map((_, i) => {
                 const hour = i.toString().padStart(2, '0')
@@ -186,7 +189,7 @@ function AvailabilityModal({ onClose, onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label>End Time</label>
+            <label>{t('end_time')}</label>
             <select value={end} onChange={e => setEnd(e.target.value)}>
               {[...Array(24)].map((_, i) => {
                 const hour = i.toString().padStart(2, '0')
@@ -200,9 +203,9 @@ function AvailabilityModal({ onClose, onSuccess }) {
         </div>
 
         <div style={{ display:'flex', gap:'1rem', marginTop:'2rem' }}>
-          <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose} disabled={busy}>Cancel</button>
+          <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose} disabled={busy}>{t('cancel')}</button>
           <button className="btn btn-primary" style={{ flex:1 }} onClick={submit} disabled={busy}>
-            {busy ? 'Saving...' : 'Add Slot'}
+            {busy ? t('saving') : t('add_slot')}
           </button>
         </div>
       </div>

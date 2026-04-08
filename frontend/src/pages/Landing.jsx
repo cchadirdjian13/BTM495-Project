@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
+
 
 export default function Landing() {
   const { login, register } = useAuth()
+  const { language, toggleLanguage, t } = useLanguage()
+
   const [mode, setMode]     = useState('login')   // 'login' | 'register'
   const [role, setRole]     = useState('client')
   const [form, setForm]     = useState({ name:'', email:'', password:'', phone:'' })
@@ -31,23 +35,33 @@ export default function Landing() {
     <div className="landing-bg">
       <div className="landing-glow" />
 
+      {/* Language Toggle */}
+      <div style={{ position: 'fixed', top: '1.5rem', right: '2rem', zIndex: 100 }}>
+        <button 
+          onClick={toggleLanguage} 
+          className="btn btn-ghost btn-sm" 
+          style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--gold)', background: 'var(--surface1)', border: '1px solid var(--border)' }}
+        >
+          {language === 'en' ? 'FR' : 'EN'}
+        </button>
+      </div>
+
       {/* Left — Branding */}
       <div className="landing-left">
-        <p className="tagline">✂ Premium Barber Shop</p>
+        <p className="tagline">✂ {t('shop_name')}</p>
         <h1>
-          Your Best Cut<br />
-          <span className="gold-text">Starts Here.</span>
+          {t('tagline_start')}<br />
+          <span className="gold-text">{t('tagline_end')}</span>
         </h1>
         <p>
-          Book appointments with top barbers, track your history,
-          and experience a seamless grooming journey — all in one place.
+          {t('hero_description')}
         </p>
 
         <div style={{ display:'flex', gap:'2rem', marginTop:'2.5rem' }}>
           {[
-            { icon:'✂', label:'Expert Barbers' },
-            { icon:'📅', label:'Easy Booking' },
-            { icon:'⭐', label:'Verified Reviews' },
+            { icon:'✂', label: t('expert_barbers') },
+            { icon:'📅', label: t('easy_booking') },
+            { icon:'⭐', label: t('verified_reviews') },
           ].map(f => (
             <div key={f.label} style={{ textAlign:'center' }}>
               <div style={{ fontSize:'1.6rem', marginBottom:'0.3rem' }}>{f.icon}</div>
@@ -60,17 +74,17 @@ export default function Landing() {
       {/* Right — Auth Card */}
       <div className="landing-right">
         <div className="auth-card">
-          <h2>{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
+          <h2>{mode === 'login' ? t('welcome_back') : t('create_account')}</h2>
           <p className="subtitle">
             {mode === 'login'
-              ? 'Sign in to manage your appointments.'
-              : 'Join us and book your first appointment.'}
+              ? t('sign_in_subtitle')
+              : t('register_subtitle')}
           </p>
 
           {/* Login / Register tabs */}
           <div className="auth-tabs">
-            <button className={`auth-tab${mode==='login'?' active':''}`} onClick={() => { setMode('login'); setError('') }}>Sign In</button>
-            <button className={`auth-tab${mode==='register'?' active':''}`} onClick={() => { setMode('register'); setError('') }}>Register</button>
+            <button className={`auth-tab${mode==='login'?' active':''}`} onClick={() => { setMode('login'); setError('') }}>{t('sign_in')}</button>
+            <button className={`auth-tab${mode==='register'?' active':''}`} onClick={() => { setMode('register'); setError('') }}>{t('register')}</button>
           </div>
 
           {error && <div className="alert alert-error">{error}</div>}
@@ -80,19 +94,19 @@ export default function Landing() {
               <>
                 {/* Role selector */}
                 <div className="form-group">
-                  <label>I am a</label>
+                  <label>{t('i_am_a')}</label>
                   <div className="role-selector">
                     <button type="button" className={`role-btn${role==='client'?' active':''}`} onClick={() => setRole('client')}>
-                      👤 Client
+                      👤 {t('role_client')}
                     </button>
                     <button type="button" className={`role-btn${role==='barber'?' active':''}`} onClick={() => setRole('barber')}>
-                      ✂ Barber
+                      ✂ {t('role_barber')}
                     </button>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Full Name</label>
+                  <label>{t('full_name')}</label>
                   <input
                     placeholder="John Doe"
                     value={form.name}
@@ -101,7 +115,7 @@ export default function Landing() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Phone</label>
+                  <label>{t('phone')}</label>
                   <input
                     placeholder="555-0123"
                     value={form.phone}
@@ -113,7 +127,7 @@ export default function Landing() {
             )}
 
             <div className="form-group">
-              <label>Email</label>
+              <label>{t('email')}</label>
               <input
                 type="email"
                 placeholder="you@example.com"
@@ -123,7 +137,7 @@ export default function Landing() {
               />
             </div>
             <div className="form-group">
-              <label>Password</label>
+              <label>{t('password')}</label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -139,23 +153,23 @@ export default function Landing() {
               disabled={busy}
               style={{ marginTop:'0.5rem' }}
             >
-              {busy ? 'Please wait…' : (mode === 'login' ? 'Sign In' : 'Create Account')}
+              {busy ? (language === 'fr' ? 'S’il vous plaît, attendez…' : 'Please wait…') : (mode === 'login' ? t('sign_in_button') : t('create_account_button'))}
             </button>
           </form>
 
           <div className="divider" />
           <div className="switch-mode">
             {mode === 'login'
-              ? <>Don't have an account? <button onClick={() => { setMode('register'); setError('') }}>Register</button></>
-              : <>Already have an account? <button onClick={() => { setMode('login'); setError('') }}>Sign In</button></>
+              ? <>{t('no_account')} <button onClick={() => { setMode('register'); setError('') }}>{t('register')}</button></>
+              : <>{t('has_account')} <button onClick={() => { setMode('login'); setError('') }}>{t('sign_in')}</button></>
             }
           </div>
 
           {mode === 'login' && (
             <div style={{ marginTop:'1rem', padding:'0.8rem', background:'var(--surface2)', borderRadius:'var(--radius-sm)', fontSize:'0.78rem', color:'var(--muted)' }}>
-              <strong style={{color:'var(--gold)'}}>Demo accounts:</strong><br/>
+              <strong style={{color:'var(--gold)'}}>{t('demo_accounts')}:</strong><br/>
               Client: alice@email.com / demo1234<br/>
-              Barber: james@barbershop.com / demo1234
+              Stylist: james@salondimension.com / demo1234
             </div>
           )}
         </div>

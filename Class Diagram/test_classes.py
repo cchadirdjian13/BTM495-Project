@@ -9,8 +9,8 @@ from payment import Payment
 from review import Review
 from notification import Notification
 
-def test_barber_shop_flow():
-    print("--- Starting Barber Shop Flow Test ---")
+def test_salon_dimension_flow():
+    print("--- Starting Salon Dimension Flow Test ---")
 
     # 1. Create Users
     client = Client(1, "John Doe", "john@example.com", "password123", "555-0101")

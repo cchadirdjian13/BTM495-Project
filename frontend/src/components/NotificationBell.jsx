@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
+
 
 export default function NotificationBell() {
   const { notifications, unreadCount, markRead, markAllRead } = useAuth()
+  const { language, t } = useLanguage()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -15,7 +18,7 @@ export default function NotificationBell() {
 
   const fmt = (iso) => {
     const d = new Date(iso)
-    return d.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
+    return d.toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
   }
 
   return (
@@ -24,7 +27,7 @@ export default function NotificationBell() {
         className="btn btn-ghost btn-sm"
         style={{ fontSize:'1.2rem', padding:'0.4rem 0.6rem', position:'relative' }}
         onClick={() => setOpen(o => !o)}
-        title="Notifications"
+        title={t('notifications')}
       >
         🔔
         {unreadCount > 0 && (
@@ -35,16 +38,16 @@ export default function NotificationBell() {
       {open && (
         <div className="notif-dropdown">
           <div className="notif-dropdown-header">
-            <h4>Notifications {unreadCount > 0 && <span className="gold-text">({unreadCount})</span>}</h4>
+            <h4>{t('notifications')} {unreadCount > 0 && <span className="gold-text">({unreadCount})</span>}</h4>
             {unreadCount > 0 && (
-              <button className="btn btn-ghost btn-sm" onClick={markAllRead}>Mark all read</button>
+              <button className="btn btn-ghost btn-sm" onClick={markAllRead}>{t('mark_all_read')}</button>
             )}
           </div>
 
           <div className="notif-list">
             {notifications.length === 0 ? (
               <div style={{ padding:'1.5rem', textAlign:'center', color:'var(--muted)', fontSize:'0.85rem' }}>
-                No notifications yet
+                {t('no_notifications')}
               </div>
             ) : notifications.map(n => (
               <div

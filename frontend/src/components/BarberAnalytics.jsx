@@ -1,6 +1,10 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext'
+
 
 function BarberAnalytics({ appointments }) {
+  const { language, t } = useLanguage()
+
   // 1. Revenue & Completion Stats
   const completed = appointments.filter(a => a.status === 'Completed')
   const cancelled = appointments.filter(a => a.status === 'Cancelled')
@@ -14,11 +18,15 @@ function BarberAnalytics({ appointments }) {
   const uniqueClients = new Set(completed.map(a => a.client.user_id)).size
 
   // 3. Monthly Breakdowns for Bar Chart
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const monthsFr = ['Janv', 'Févr', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc']
+  const months = language === 'fr' ? monthsFr : monthsEn
+  
   const monthlyData = {}
   
   // Initialize current and previous 5 months
-  const currentMonthIdx = new Date().getMonth()
+  const today = new Date()
+  const currentMonthIdx = today.getMonth()
   for (let i = 5; i >= 0; i--) {
     let idx = currentMonthIdx - i
     if (idx < 0) idx += 12
@@ -52,15 +60,15 @@ function BarberAnalytics({ appointments }) {
       {/* Top Value Metrics */}
       <div className="stats-row" style={{ marginBottom: '2rem' }}>
         <div className="stat-card">
-          <div className="stat-label">Total Revenue</div>
+          <div className="stat-label">{t('total_revenue')}</div>
           <div className="stat-value gold-text">${totalRevenue.toFixed(2)}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Unique Clients</div>
+          <div className="stat-label">{t('unique_clients')}</div>
           <div className="stat-value">{uniqueClients}</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Cancellation Rate</div>
+          <div className="stat-label">{t('cancel_rate')}</div>
           <div className="stat-value" style={{ color: cancelRate > 20 ? 'var(--error)' : 'var(--text)' }}>
             {cancelRate}%
           </div>
@@ -70,7 +78,7 @@ function BarberAnalytics({ appointments }) {
       <div className="grid-2">
         {/* Monthly Clients Bar Chart */}
         <div className="card">
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Clients Over Time</h2>
+          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>{t('clients_over_time')}</h2>
           <div className="bar-chart-container">
             {Object.entries(monthlyData).map(([m, val]) => {
               const heightPercent = `${(val / maxMonthly) * 100}%`
@@ -87,9 +95,9 @@ function BarberAnalytics({ appointments }) {
 
         {/* Top Services */}
         <div className="card">
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Top Performed Services</h2>
+          <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>{t('top_services')}</h2>
           {sortedServices.length === 0 ? (
-            <p className="muted">Not enough data to determine top services.</p>
+            <p className="muted">{t('not_enough_data')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
               {sortedServices.map(([name, count]) => {
@@ -97,8 +105,8 @@ function BarberAnalytics({ appointments }) {
                 return (
                   <div key={name}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                      <span style={{ fontWeight: 500 }}>{name}</span>
-                      <span className="gold-text">{count} jobs</span>
+                      <span style={{ fontWeight: 500 }}>{t(name)}</span>
+                      <span className="gold-text">{count} {t('jobs')}</span>
                     </div>
                     <div className="progress-wrap">
                       <div className="progress-fill" style={{ width: `${perc}%` }}></div>

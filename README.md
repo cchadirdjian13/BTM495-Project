@@ -1,6 +1,6 @@
-# Premium Barber Shop Appointment System ✂️
+# Premium Salon Dimension Appointment System ✂️
 
-A full-stack web application designed to handle the end-to-end booking flow for a high-end barber shop. It provides dedicated dashboards for both Clients and Barbers, allowing for seamless appointment scheduling, real-time status updates, payments, and reviews. 
+A full-stack web application designed to handle the end-to-end booking flow for a high-end salon. It provides dedicated dashboards for both Clients and Stylists, allowing for seamless appointment scheduling, real-time status updates, payments, and reviews. 
 
 The application is built combining a sleek, glassmorphic React frontend with a lightweight Flask REST backend, which wraps pure Python business logic objects.
 
@@ -17,7 +17,7 @@ The project is split into three main layers:
    A lightweight Flask API (`app.py`) serves as the bridge between the frontend web client and the backend Python classes. It uses an in-memory datastore (`state.py`) to hold all class instances. It features clean HTTP endpoints for authentication, fetching data, and mutating system state.
 
 3. **`frontend/` (React + Vite SPA)**
-   The user interface is built as a Single Page Application using React and Vite. It is purely driven by vanilla CSS (`index.css`), showcasing a custom dark luxury theme with gold accents, tailored for the premium aesthetic of a classic barber shop.
+   The user interface is built as a Single Page Application using React and Vite. It is purely driven by vanilla CSS (`index.css`), showcasing a custom dark luxury theme with gold accents, tailored for the premium aesthetic of a classic salon.
 
 ---
 
@@ -86,10 +86,10 @@ The backend automatically pre-seeds the in-memory state with existing users and 
 - **Password:** `demo1234`
 
 **Barber Account:**
-- **Email:** `marcus@barbershop.com`
+- **Email:** `marcus@salondimension.com`
 - **Password:** `demo1234`
 
-*(Additional barber accounts generated: `james@barbershop.com` & `diego@barbershop.com` - all use the same password).*
+*(Additional staff accounts generated: `james@salondimension.com` & `diego@salondimension.com` - all use the same password).*
 
 ---
 

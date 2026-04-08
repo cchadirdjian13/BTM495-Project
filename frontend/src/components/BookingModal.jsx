@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { barbersAPI, servicesAPI, appointmentsAPI } from '../api/api'
+import { useLanguage } from '../context/LanguageContext'
+
 import ServiceCard, { BarberCard } from './ServiceCard'
 import SlotPicker from './SlotPicker'
 
 export default function BookingModal({ onClose, onBooked }) {
+  const { language, t } = useLanguage()
   const [step, setStep]     = useState(1)   // 1: barber, 2: service, 3: slot, 4: confirm
   const [barbers, setBarbers] = useState([])
   const [services, setServices] = useState([])
@@ -39,7 +42,7 @@ export default function BookingModal({ onClose, onBooked }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2>Book Appointment</h2>
+          <h2>{t('book_appointment')}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
@@ -51,7 +54,7 @@ export default function BookingModal({ onClose, onBooked }) {
         {/* Step 1: Choose barber */}
         {step === 1 && (
           <div style={{ marginTop:'1.2rem' }}>
-            <p className="muted" style={{marginBottom:'1rem'}}>Choose your barber</p>
+            <p className="muted" style={{marginBottom:'1rem'}}>{t('choose_barber')}</p>
             <div style={{ display:'flex', flexDirection:'column', gap:'0.7rem' }}>
               {barbers.map(b => (
                 <BarberCard
@@ -63,7 +66,7 @@ export default function BookingModal({ onClose, onBooked }) {
             </div>
             <div style={{display:'flex',justifyContent:'flex-end',marginTop:'1.4rem'}}>
               <button className="btn btn-primary" disabled={!selectedBarber} onClick={() => setStep(2)}>
-                Next →
+                {t('next')} →
               </button>
             </div>
           </div>
@@ -72,7 +75,7 @@ export default function BookingModal({ onClose, onBooked }) {
         {/* Step 2: Choose service */}
         {step === 2 && (
           <div style={{ marginTop:'1.2rem' }}>
-            <p className="muted" style={{marginBottom:'1rem'}}>Choose a service</p>
+            <p className="muted" style={{marginBottom:'1rem'}}>{t('choose_service')}</p>
             <div className="grid-2" style={{gap:'0.7rem'}}>
               {services.map(s => (
                 <ServiceCard
@@ -83,8 +86,8 @@ export default function BookingModal({ onClose, onBooked }) {
               ))}
             </div>
             <div style={{display:'flex',justifyContent:'space-between',marginTop:'1.4rem'}}>
-              <button className="btn btn-ghost" onClick={() => setStep(1)}>← Back</button>
-              <button className="btn btn-primary" disabled={!selectedService} onClick={() => setStep(3)}>Next →</button>
+              <button className="btn btn-ghost" onClick={() => setStep(1)}>← {t('back')}</button>
+              <button className="btn btn-primary" disabled={!selectedService} onClick={() => setStep(3)}>{t('next')} →</button>
             </div>
           </div>
         )}
@@ -93,12 +96,12 @@ export default function BookingModal({ onClose, onBooked }) {
         {step === 3 && (
           <div style={{ marginTop:'1.2rem' }}>
             <p className="muted" style={{marginBottom:'1rem'}}>
-              Pick an available time with <strong style={{color:'var(--text)'}}>{selectedBarber.name}</strong>
+              {t('pick_time')} <strong style={{color:'var(--text)'}}>{selectedBarber.name}</strong>
             </p>
             <SlotPicker barberId={selectedBarber.user_id} onSelect={setSlot} />
             <div style={{display:'flex',justifyContent:'space-between',marginTop:'1.4rem'}}>
-              <button className="btn btn-ghost" onClick={() => setStep(2)}>← Back</button>
-              <button className="btn btn-primary" disabled={!selectedSlot} onClick={() => setStep(4)}>Review →</button>
+              <button className="btn btn-ghost" onClick={() => setStep(2)}>← {t('back')}</button>
+              <button className="btn btn-primary" disabled={!selectedSlot} onClick={() => setStep(4)}>{t('next')} →</button>
             </div>
           </div>
         )}
@@ -106,19 +109,19 @@ export default function BookingModal({ onClose, onBooked }) {
         {/* Step 4: Confirm */}
         {step === 4 && (
           <div style={{ marginTop:'1.2rem' }}>
-            <p className="muted" style={{marginBottom:'1.2rem'}}>Confirm your appointment</p>
+            <p className="muted" style={{marginBottom:'1.2rem'}}>{t('confirm_booking')}</p>
             <div className="card" style={{display:'flex',flexDirection:'column',gap:'0.7rem'}}>
-              <Row label="Barber"  value={selectedBarber.name} />
-              <Row label="Service" value={`${selectedService.name} — $${selectedService.price}`} />
-              <Row label="Date"    value={selectedSlot.date} />
-              <Row label="Time"    value={`${selectedSlot.start_time} – ${selectedSlot.end_time}`} />
-              <Row label="Duration" value={`${selectedService.duration} min`} />
+              <Row label={t('barber')}  value={selectedBarber.name} />
+              <Row label={t('service')} value={`${t(selectedService.name)} — $${selectedService.price}`} />
+              <Row label={t('date')}    value={selectedSlot.date} />
+              <Row label={t('time')}    value={`${selectedSlot.start_time} – ${selectedSlot.end_time}`} />
+              <Row label={t('duration')} value={`${selectedService.duration} min`} />
             </div>
             {error && <div className="alert alert-error" style={{marginTop:'0.8rem'}}>{error}</div>}
             <div style={{display:'flex',justifyContent:'space-between',marginTop:'1.4rem'}}>
-              <button className="btn btn-ghost" onClick={() => setStep(3)}>← Back</button>
+              <button className="btn btn-ghost" onClick={() => setStep(3)}>← {t('back')}</button>
               <button className="btn btn-primary" disabled={loading} onClick={confirm}>
-                {loading ? 'Booking…' : '✓ Confirm Booking'}
+                {loading ? (language === 'fr' ? 'Réservation...' : 'Booking…') : `✓ ${t('confirm_booking')}`}
               </button>
             </div>
           </div>
@@ -129,7 +132,8 @@ export default function BookingModal({ onClose, onBooked }) {
 }
 
 function StepBar({ step }) {
-  const labels = ['Barber', 'Service', 'Time', 'Confirm']
+  const { t } = useLanguage()
+  const labels = [t('barber'), t('service'), t('time'), t('confirm')]
   return (
     <div style={{ display:'flex', alignItems:'center', gap:'0', marginTop:'0.5rem' }}>
       {labels.map((l, i) => {

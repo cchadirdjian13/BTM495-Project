@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { barbersAPI } from '../api/api'
+import { useLanguage } from '../context/LanguageContext'
+
 
 // Returns next N days as YYYY-MM-DD strings
 function getNextDays(n = 14) {
@@ -13,12 +15,13 @@ function getNextDays(n = 14) {
   return days
 }
 
-function fmtDate(iso) {
+function fmtDate(iso, lang) {
   const d = new Date(iso + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' })
+  return d.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday:'short', month:'short', day:'numeric' })
 }
 
 export default function SlotPicker({ barberId, onSelect }) {
+  const { language, t } = useLanguage()
   const days = getNextDays(14)
   const [selectedDate, setDate] = useState(days[0])
   const [slots, setSlots]       = useState([])
@@ -49,16 +52,16 @@ export default function SlotPicker({ barberId, onSelect }) {
             className={`slot-date-btn${selectedDate === d ? ' selected' : ''}`}
             onClick={() => { setDate(d); setSelected(null) }}
           >
-            {fmtDate(d)}
+            {fmtDate(d, language)}
           </button>
         ))}
       </div>
 
       {/* Time slots */}
       {loading ? (
-        <div className="muted" style={{textAlign:'center',padding:'1rem'}}>Loading slots…</div>
+        <div className="muted" style={{textAlign:'center',padding:'1rem'}}>{t('loading')}</div>
       ) : slots.length === 0 ? (
-        <div className="muted" style={{textAlign:'center',padding:'1rem'}}>No slots available this day.</div>
+        <div className="muted" style={{textAlign:'center',padding:'1rem'}}>{language === 'fr' ? 'Aucun créneau disponible ce jour.' : 'No slots available this day.'}</div>
       ) : (
         <div className="slot-times">
           {slots.map(slot => (
