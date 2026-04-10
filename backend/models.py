@@ -64,6 +64,7 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    tip = db.Column(db.Float, default=0.0)
     method = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), default='Paid') # Pending, Paid, Refunded
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

@@ -115,13 +115,35 @@ function PaymentModal({ appt, onClose, onSuccess }) {
   const { t } = useLanguage()
   const [method, setMethod] = useState('Credit Card')
   const [step, setStep]     = useState('form') // 'form' | 'processing' | 'success'
+  const [tipOption, setTipOption] = useState(null) // null | 15 | 18 | 20 | 'other'
+  const [customTip, setCustomTip] = useState('')
+
+  const servicePrice = appt.service.price
+  const tipAmount = tipOption === 'other'
+    ? (parseFloat(customTip) || 0)
+    : tipOption
+      ? parseFloat((servicePrice * (tipOption / 100)).toFixed(2))
+      : 0
+  const totalAmount = parseFloat((servicePrice + tipAmount).toFixed(2))
+
+  const handleCustomTipChange = (e) => {
+    const val = e.target.value
+    // Allow only digits and a single decimal point
+    if (/^\d*\.?\d{0,2}$/.test(val)) {
+      setCustomTip(val)
+    }
+  }
 
   const pay = async () => {
     setStep('processing')
     try {
-      // Small artificial delay to show off the cool processing state
       await new Promise(r => setTimeout(r, 1200))
-      await paymentsAPI.pay({ appointment_id: appt.appointment_id, amount: appt.service.price, method })
+      await paymentsAPI.pay({
+        appointment_id: appt.appointment_id,
+        amount: totalAmount,
+        method,
+        tip: tipAmount
+      })
       setStep('success')
     } catch(e) {
       alert(e.message)
@@ -129,22 +151,108 @@ function PaymentModal({ appt, onClose, onSuccess }) {
     }
   }
 
+  const tipPresets = [15, 18, 20]
+
   return (
     <div className="modal-overlay" onClick={e => step !== 'processing' && e.target===e.currentTarget && onClose()}>
-      <div className="modal" style={{ maxWidth: 400, textAlign: step === 'form' ? 'left' : 'center' }}>
+      <div className="modal" style={{ maxWidth: 420, textAlign: step === 'form' ? 'left' : 'center' }}>
         
         {step === 'form' && (
           <>
             <h2>{t('complete_payment')}</h2>
+
+            {/* Price Breakdown */}
             <div style={{ margin:'1.5rem 0', background:'var(--surface2)', padding:'1rem', borderRadius:'var(--radius-sm)' }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.5rem' }}>
                 <span className="muted">{t(appt.service.name)}</span>
-                <span>${appt.service.price.toFixed(2)}</span>
+                <span>${servicePrice.toFixed(2)}</span>
               </div>
+              {tipAmount > 0 && (
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.5rem', color:'var(--success)', fontSize:'0.9rem' }}>
+                  <span>✦ {t('tip')}</span>
+                  <span>+${tipAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div style={{ display:'flex', justifyContent:'space-between', fontWeight:600, borderTop:'1px solid var(--border)', paddingTop:'0.5rem' }}>
                 <span>{t('total')}</span>
-                <span className="gold-text">${appt.service.price.toFixed(2)}</span>
+                <span className="gold-text">${totalAmount.toFixed(2)}</span>
               </div>
+            </div>
+
+            {/* Tip Section */}
+            <div style={{ marginBottom:'1.2rem' }}>
+              <label style={{ fontSize:'0.82rem', fontWeight:500, color:'var(--muted)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:'0.6rem', display:'block' }}>
+                {t('add_tip')}
+              </label>
+              <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap' }}>
+                {tipPresets.map(pct => {
+                  const isActive = tipOption === pct
+                  return (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setTipOption(isActive ? null : pct)}
+                      className={isActive ? '' : ''}
+                      style={{
+                        flex: 1,
+                        minWidth: 60,
+                        padding: '0.6rem 0.4rem',
+                        borderRadius: 'var(--radius-sm)',
+                        border: isActive ? '1.5px solid var(--gold)' : '1px solid var(--border)',
+                        background: isActive ? 'var(--gold-dim)' : 'var(--surface2)',
+                        color: isActive ? 'var(--gold)' : 'var(--text)',
+                        fontWeight: isActive ? 600 : 400,
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        transition: 'all var(--transition)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.15rem',
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{pct}%</span>
+                      <span style={{ fontSize:'0.72rem', color:'var(--muted)' }}>${(servicePrice * pct / 100).toFixed(2)}</span>
+                    </button>
+                  )
+                })}
+                <button
+                  type="button"
+                  onClick={() => { setTipOption(tipOption === 'other' ? null : 'other'); setCustomTip('') }}
+                  style={{
+                    flex: 1,
+                    minWidth: 60,
+                    padding: '0.6rem 0.4rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: tipOption === 'other' ? '1.5px solid var(--gold)' : '1px solid var(--border)',
+                    background: tipOption === 'other' ? 'var(--gold-dim)' : 'var(--surface2)',
+                    color: tipOption === 'other' ? 'var(--gold)' : 'var(--text)',
+                    fontWeight: tipOption === 'other' ? 600 : 400,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition)',
+                  }}
+                >
+                  {t('tip_other')}
+                </button>
+              </div>
+
+              {/* Custom tip input */}
+              {tipOption === 'other' && (
+                <div style={{ marginTop:'0.7rem', position:'relative', animation:'fadeIn 0.2s ease' }}>
+                  <span style={{ position:'absolute', left:'0.9rem', top:'50%', transform:'translateY(-50%)', color:'var(--muted)', fontSize:'0.95rem', pointerEvents:'none' }}>$</span>
+                  <input
+                    id="custom-tip-input"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={customTip}
+                    onChange={handleCustomTipChange}
+                    autoFocus
+                    style={{ paddingLeft:'1.6rem' }}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -159,7 +267,7 @@ function PaymentModal({ appt, onClose, onSuccess }) {
             <div style={{ display:'flex', gap:'1rem', marginTop:'2rem' }}>
               <button className="btn btn-ghost" style={{ flex:1 }} onClick={onClose}>{t('cancel')}</button>
               <button className="btn btn-primary" style={{ flex:1 }} onClick={pay}>
-                {t('pay_amount')} ${appt.service.price.toFixed(2)}
+                {t('pay_amount')} ${totalAmount.toFixed(2)}
               </button>
             </div>
           </>

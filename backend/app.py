@@ -139,6 +139,7 @@ def serialise_payment(pmt: Payment) -> dict:
         "payment_id": pmt.id,
         "appointment_id": pmt.appointment_id,
         "amount": pmt.amount,
+        "tip": pmt.tip or 0.0,
         "method": pmt.method,
         "status": pmt.status,
         "timestamp": pmt.timestamp.isoformat() if pmt.timestamp else None,
@@ -452,6 +453,7 @@ def make_payment():
     pmt = Payment(
         appointment_id=appt.id,
         amount=body["amount"],
+        tip=body.get("tip", 0.0),
         method=body["method"]
     )
     db.session.add(pmt)

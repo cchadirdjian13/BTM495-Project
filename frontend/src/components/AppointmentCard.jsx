@@ -48,6 +48,11 @@ export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, o
       {appt.payments.length > 0 && (
         <div style={{ background:'var(--surface2)', borderRadius:'var(--radius-sm)', padding:'0.6rem 0.9rem', fontSize:'0.82rem' }}>
           💳 {appt.payments[0].method} — ${appt.payments[0].amount.toFixed(2)}
+          {appt.payments[0].tip > 0 && (
+            <span style={{ marginLeft:'0.4rem', color:'var(--gold)', fontSize:'0.78rem' }}>
+              ({t('tip')}: ${appt.payments[0].tip.toFixed(2)})
+            </span>
+          )}
           <span style={{ marginLeft:'0.6rem', color:'var(--success)' }}>{t('paid')}</span>
         </div>
       )}
