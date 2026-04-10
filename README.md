@@ -33,6 +33,7 @@ The project is split into three main layers:
 - **Smart Booking**: A multi-step wizard to pick a specific barber, a desired service, and an available date/time slot. Success is capped off with a rewarding, smooth SVG/CSS animated scissor cutting sequence.
 - **Bilingual Interface**: Toggle seamlessly between French and English inside the dashboard.
 - **Manage Appointments**: Keep track of scheduled haircuts, confirm past ones, and securely handle payments.
+- **Tipping at Checkout**: When paying for an appointment, clients can add an optional tip with quick-select presets (15%, 18%, 20%) or enter a custom amount. The tip is displayed in the price breakdown and stored alongside the payment record. Only numeric input is accepted for custom tips.
 - **Leave Reviews**: Share feedback and provide a 1-to-5 star rating on completed appointments.
 - **Live Notifications**: Get instant in-app alerts and simulated localized SMS/Email notifications securely processed over the backend.
 
@@ -57,13 +58,14 @@ From the root directory of the project, run:
 
 ```bash
 # Install the required Python packages (only once)
-pip install flask flask-cors flask-sqlalchemy
+pip install flask flask-cors flask-sqlalchemy flask-apscheduler
 
 # Start the Flask API (auto-seeds the SQLite DB on first run)
 python run.py
-
-*(Note: If you get an error saying 'python' is not recognized, try using 'py' instead)*
 ```
+
+> **Note:** If `python` is not recognized, try `py run.py` instead.
+> If upgrading from a previous version, delete `backend/salondimension.db` before restarting so the database schema is recreated with the latest columns (e.g. the `tip` field on payments).
 
 _The backend server will natively run at `http://localhost:5000`._
 _(You can optionally execute `python check_db.py` to view the seeded database configurations)_
@@ -106,6 +108,6 @@ The backend automatically pre-seeds the SQLite database with user accounts, appo
 
 ## 🔮 Future Enhancements (Roadmap)
 
-- **Payment Gateway**: The current payment system acts as an integration stub. Hooking into Stripe or Square APIs would enable real transactions.
+- **Payment Gateway**: The current payment flow (including the built-in tipping system) acts as an integration stub. Hooking into Stripe or Square APIs would enable real transactions while preserving the existing tip calculations.
 - **Role-based Authentication**: Expanding the API with secure JWTs to fully lock down Barber boundaries.
-- **Production Email Sending**: Linking `notifications.py` to an active SMTP server or an API string like SendGrid to blast real emails instead of console logging prototypes.
+- **Production Email Sending**: Linking `notifications.py` to an active SMTP server or an API service like SendGrid to send real emails instead of console logging prototypes.
