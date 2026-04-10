@@ -9,7 +9,13 @@ function BarberAnalytics({ appointments }) {
   const completed = appointments.filter(a => a.status === 'Completed')
   const cancelled = appointments.filter(a => a.status === 'Cancelled')
   
-  const totalRevenue = completed.reduce((sum, a) => sum + (a.service?.price || 0), 0)
+  const totalRevenue = completed.reduce((sum, a) => {
+    // Use actual payment amounts (includes tip) if available, otherwise fall back to service price
+    if (a.payments && a.payments.length > 0) {
+      return sum + a.payments.reduce((pSum, p) => pSum + (p.amount || 0), 0)
+    }
+    return sum + (a.service?.price || 0)
+  }, 0)
   
   const totalBookings = appointments.length
   const cancelRate = totalBookings > 0 ? ((cancelled.length / totalBookings) * 100).toFixed(1) : 0
