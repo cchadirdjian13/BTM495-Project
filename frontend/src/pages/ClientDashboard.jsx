@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
-
+import { Check } from 'lucide-react'
 import { appointmentsAPI, paymentsAPI, reviewsAPI } from '../api/api'
 import AppointmentCard from '../components/AppointmentCard'
 import BookingModal from '../components/BookingModal'
@@ -280,7 +280,6 @@ function PaymentModal({ appt, onClose, onSuccess }) {
               borderTopColor: 'var(--gold)', borderRadius: '50%',
               animation: 'spin 1s linear infinite'
             }} />
-            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
             <h3 style={{ marginTop: '1rem' }}>{t('processing_payment')}</h3>
             <p className="muted">{t('secure_contacting')}</p>
           </div>
@@ -288,7 +287,9 @@ function PaymentModal({ appt, onClose, onSuccess }) {
 
         {step === 'success' && (
           <div style={{ padding: '2rem 0', animation: 'fadeIn 0.4s ease' }}>
-            <div style={{ fontSize: '4rem', color: 'var(--gold)', marginBottom: '1rem' }}>✓</div>
+            <div style={{ color: 'var(--gold)', marginBottom: '1rem' }} aria-hidden="true">
+            <Check size={64} strokeWidth={2} />
+          </div>
             <h2 style={{ marginBottom: '0.5rem' }}>{t('payment_success')}</h2>
             <p className="muted" style={{ marginBottom: '2rem' }}>{t('payment_thank_you')}</p>
             <button className="btn btn-primary btn-block" onClick={onSuccess}>{t('done')}</button>

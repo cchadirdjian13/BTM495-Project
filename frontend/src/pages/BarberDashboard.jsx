@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { X } from 'lucide-react'
 import { appointmentsAPI, barbersAPI, availabilityAPI } from '../api/api'
 
 import AppointmentCard from '../components/AppointmentCard'
@@ -169,7 +170,12 @@ function AvailabilityModal({ onClose, onSuccess }) {
   return (
     <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
       <div className="modal" style={{ maxWidth: 420 }}>
-        <h2>{t('add_block')}</h2>
+        <div className="modal-header">
+          <h2>{t('add_block')}</h2>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
         <p className="muted" style={{ marginBottom:'2rem' }}>{t('set_window')}</p>
 
         <div className="grid-2">

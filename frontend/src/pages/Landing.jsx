@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { Scissors, Calendar, Star, User, Eye, EyeOff } from 'lucide-react'
 
 
 export default function Landing() {
@@ -12,6 +13,7 @@ export default function Landing() {
   const [form, setForm]     = useState({ name:'', email:'', password:'', phone:'' })
   const [error, setError]   = useState('')
   const [busy, setBusy]     = useState(false)
+  const [showPass, setShowPass] = useState(false)
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -48,7 +50,7 @@ export default function Landing() {
 
       {/* Left — Branding */}
       <div className="landing-left">
-        <p className="tagline">✂ {t('shop_name')}</p>
+        <p className="tagline"><Scissors size={13} aria-hidden="true" style={{ verticalAlign: 'middle', marginRight: '0.35em' }} />{t('shop_name')}</p>
         <h1>
           {t('tagline_start')}<br />
           <span className="gold-text">{t('tagline_end')}</span>
@@ -59,13 +61,13 @@ export default function Landing() {
 
         <div style={{ display:'flex', gap:'2rem', marginTop:'2.5rem' }}>
           {[
-            { icon:'✂', label: t('expert_barbers') },
-            { icon:'📅', label: t('easy_booking') },
-            { icon:'⭐', label: t('verified_reviews') },
+            { icon: <Scissors size={24} aria-hidden="true" />, label: t('expert_barbers') },
+            { icon: <Calendar size={24} aria-hidden="true" />, label: t('easy_booking') },
+            { icon: <Star size={24} aria-hidden="true" />,    label: t('verified_reviews') },
           ].map(f => (
             <div key={f.label} style={{ textAlign:'center' }}>
-              <div style={{ fontSize:'1.6rem', marginBottom:'0.3rem' }}>{f.icon}</div>
-              <div style={{ fontSize:'0.78rem', color:'var(--muted)', fontWeight:500 }}>{f.label}</div>
+              <div style={{ color:'var(--gold)', marginBottom:'0.3rem', display:'flex', justifyContent:'center' }}>{f.icon}</div>
+              <div className="muted" style={{ fontWeight:500 }}>{f.label}</div>
             </div>
           ))}
         </div>
@@ -83,8 +85,8 @@ export default function Landing() {
 
           {/* Login / Register tabs */}
           <div className="auth-tabs">
-            <button className={`auth-tab${mode==='login'?' active':''}`} onClick={() => { setMode('login'); setError('') }}>{t('sign_in')}</button>
-            <button className={`auth-tab${mode==='register'?' active':''}`} onClick={() => { setMode('register'); setError('') }}>{t('register')}</button>
+            <button className={`auth-tab${mode==='login'?' active':''}`} onClick={() => { setMode('login'); setError(''); setShowPass(false) }}>{t('sign_in')}</button>
+            <button className={`auth-tab${mode==='register'?' active':''}`} onClick={() => { setMode('register'); setError(''); setShowPass(false) }}>{t('register')}</button>
           </div>
 
           {error && <div className="alert alert-error">{error}</div>}
@@ -97,10 +99,10 @@ export default function Landing() {
                   <label>{t('i_am_a')}</label>
                   <div className="role-selector">
                     <button type="button" className={`role-btn${role==='client'?' active':''}`} onClick={() => setRole('client')}>
-                      👤 {t('role_client')}
+                      <User size={15} aria-hidden="true" /> {t('role_client')}
                     </button>
                     <button type="button" className={`role-btn${role==='barber'?' active':''}`} onClick={() => setRole('barber')}>
-                      ✂ {t('role_barber')}
+                      <Scissors size={15} aria-hidden="true" /> {t('role_barber')}
                     </button>
                   </div>
                 </div>
@@ -109,6 +111,7 @@ export default function Landing() {
                   <label>{t('full_name')}</label>
                   <input
                     placeholder="John Doe"
+                    autoComplete="name"
                     value={form.name}
                     onChange={e => update('name', e.target.value)}
                     required
@@ -117,7 +120,9 @@ export default function Landing() {
                 <div className="form-group">
                   <label>{t('phone')}</label>
                   <input
+                    type="tel"
                     placeholder="555-0123"
+                    autoComplete="tel"
                     value={form.phone}
                     onChange={e => update('phone', e.target.value)}
                     required
@@ -131,20 +136,35 @@ export default function Landing() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                autoComplete="email"
                 value={form.email}
                 onChange={e => update('email', e.target.value)}
                 required
               />
             </div>
             <div className="form-group">
-              <label>{t('password')}</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={e => update('password', e.target.value)}
-                required
-              />
+              <label htmlFor="password-input">{t('password')}</label>
+              <div className="input-wrapper">
+                <input
+                  id="password-input"
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  value={form.password}
+                  onChange={e => update('password', e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="input-eye-btn"
+                  onClick={() => setShowPass(s => !s)}
+                  aria-label={showPass ? 'Hide password' : 'Show password'}
+                >
+                  {showPass
+                    ? <EyeOff size={16} aria-hidden="true" />
+                    : <Eye    size={16} aria-hidden="true" />}
+                </button>
+              </div>
             </div>
 
             <button
@@ -160,8 +180,8 @@ export default function Landing() {
           <div className="divider" />
           <div className="switch-mode">
             {mode === 'login'
-              ? <>{t('no_account')} <button onClick={() => { setMode('register'); setError('') }}>{t('register')}</button></>
-              : <>{t('has_account')} <button onClick={() => { setMode('login'); setError('') }}>{t('sign_in')}</button></>
+              ? <>{t('no_account')} <button onClick={() => { setMode('register'); setError(''); setShowPass(false) }}>{t('register')}</button></>
+              : <>{t('has_account')} <button onClick={() => { setMode('login'); setError(''); setShowPass(false) }}>{t('sign_in')}</button></>
             }
           </div>
 

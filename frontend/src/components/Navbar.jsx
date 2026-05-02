@@ -1,5 +1,8 @@
+// ABOUTME: Top navigation bar — sticky, responsive, handles lang toggle/sign-out/notifications.
+// ABOUTME: Collapses user name+role on mobile; shows icon-only sign-out below 640px.
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { Scissors, LogOut } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 
 export default function Navbar() {
@@ -9,41 +12,51 @@ export default function Navbar() {
   if (!user) return null
 
   return (
-    <nav style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '1rem 2.5rem', borderBottom: '1px solid var(--border)',
-      background: 'var(--surface)', position: 'sticky', top: 0, zIndex: 40
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <div style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>✂</span> {t('shop_name')}
-        </div>
+    <nav className="navbar">
+      <div className="navbar-brand">
+        <Scissors size={20} aria-hidden="true" />
+        {t('shop_name')}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <button 
-          onClick={toggleLanguage} 
-          className="btn btn-ghost btn-sm" 
+      <div className="navbar-actions">
+        <button
+          onClick={toggleLanguage}
+          className="btn btn-ghost btn-sm"
+          aria-label={`Switch to ${language === 'en' ? 'French' : 'English'}`}
           style={{ fontSize: '0.75rem', fontWeight: 700, minWidth: '45px', color: 'var(--gold)' }}
         >
           {language === 'en' ? 'FR' : 'EN'}
         </button>
+
         <NotificationBell />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            {user.role === 'barber' && user.user_id <= 3 ? (
-              <img src={`/images/avatar_${user.user_id}.png`} alt={user.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--gold)' }} />
-            ) : (
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--gold)', border: '1px solid var(--border)' }}>
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '0.88rem', fontWeight: 500 }}>{user.name}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase' }}>{user.role}</div>
+
+        <div className="navbar-user">
+          {user.role === 'barber' && user.user_id <= 3 ? (
+            <img
+              src={`/images/avatar_${user.user_id}.png`}
+              alt={user.name}
+              className="navbar-avatar"
+            />
+          ) : (
+            <div className="navbar-avatar-placeholder" aria-hidden="true">
+              {user.name.charAt(0).toUpperCase()}
             </div>
+          )}
+
+          <div className="navbar-user-info">
+            <span className="navbar-user-name">{user.name}</span>
+            <span className="navbar-user-role">{user.role}</span>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={logout} style={{ marginLeft: '1rem' }}>{t('sign_out')}</button>
+
+          <button
+            className="btn btn-ghost btn-sm navbar-signout"
+            onClick={logout}
+            aria-label={t('sign_out')}
+            style={{ marginLeft: '0.5rem' }}
+          >
+            <span className="navbar-signout-label">{t('sign_out')}</span>
+            <LogOut size={16} className="navbar-signout-icon" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </nav>

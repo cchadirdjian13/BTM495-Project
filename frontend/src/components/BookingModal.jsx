@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { barbersAPI, servicesAPI, appointmentsAPI } from '../api/api'
 import { useLanguage } from '../context/LanguageContext'
-
+import { X, Check } from 'lucide-react'
 import ServiceCard, { BarberCard } from './ServiceCard'
 import SlotPicker from './SlotPicker'
 
@@ -43,7 +43,9 @@ export default function BookingModal({ onClose, onBooked }) {
       <div className="modal">
         <div className="modal-header">
           <h2>{t('book_appointment')}</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            <X size={18} aria-hidden="true" />
+          </button>
         </div>
 
         {/* Step indicator */}
@@ -121,7 +123,9 @@ export default function BookingModal({ onClose, onBooked }) {
             <div style={{display:'flex',justifyContent:'space-between',marginTop:'1.4rem'}}>
               <button className="btn btn-ghost" onClick={() => setStep(3)}>← {t('back')}</button>
               <button className="btn btn-primary" disabled={loading} onClick={confirm}>
-                {loading ? (language === 'fr' ? 'Réservation...' : 'Booking…') : `✓ ${t('confirm_booking')}`}
+                {loading
+                  ? (language === 'fr' ? 'Réservation...' : 'Booking…')
+                  : <><Check size={16} aria-hidden="true" /> {t('confirm_booking')}</>}
               </button>
             </div>
           </div>
@@ -172,32 +176,22 @@ function StepBar({ step }) {
   const { t } = useLanguage()
   const labels = [t('barber'), t('service'), t('time'), t('confirm')]
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:'0', marginTop:'0.5rem' }}>
+    <div className="step-bar" role="list" aria-label="Booking steps">
       {labels.map((l, i) => {
-        const n = i + 1
+        const n       = i + 1
         const done    = n < step
         const current = n === step
+        const active  = done || current
         return (
-          <div key={l} style={{ display:'flex', alignItems:'center', flex: i < labels.length-1 ? '1' : 'auto' }}>
-            <div style={{
-              display:'flex', flexDirection:'column', alignItems:'center', gap:'0.2rem',
-            }}>
-              <div style={{
-                width:28, height:28, borderRadius:'50%', display:'flex',
-                alignItems:'center', justifyContent:'center', fontSize:'0.78rem', fontWeight:600,
-                background: done || current ? 'var(--gold)' : 'var(--surface2)',
-                color: done || current ? '#0d0d14' : 'var(--muted)',
-                border: `2px solid ${current ? 'var(--gold)' : done ? 'var(--gold)' : 'var(--border)'}`,
-              }}>
-                {done ? '✓' : n}
+          <div key={l} className="step-item" role="listitem">
+            <div className="step-node-wrap">
+              <div className={`step-node${active ? ' step-node--active' : ''}`}>
+                {done ? <Check size={14} aria-hidden="true" /> : n}
               </div>
-              <span style={{ fontSize:'0.68rem', color: current ? 'var(--gold)' : 'var(--muted)', whiteSpace:'nowrap' }}>{l}</span>
+              <span className={`step-label${current ? ' step-label--active' : ''}`}>{l}</span>
             </div>
             {i < labels.length - 1 && (
-              <div style={{
-                flex:1, height:2, margin:'0 0.4rem 1.3rem',
-                background: done ? 'var(--gold)' : 'var(--border)',
-              }} />
+              <div className={`step-connector${done ? ' step-connector--done' : ''}`} />
             )}
           </div>
         )
@@ -208,9 +202,9 @@ function StepBar({ step }) {
 
 function Row({ label, value }) {
   return (
-    <div style={{ display:'flex', justifyContent:'space-between', fontSize:'0.88rem' }}>
-      <span style={{ color:'var(--muted)' }}>{label}</span>
-      <span style={{ fontWeight:500 }}>{value}</span>
+    <div className="booking-row">
+      <span className="booking-row-label">{label}</span>
+      <span className="booking-row-value">{value}</span>
     </div>
   )
 }

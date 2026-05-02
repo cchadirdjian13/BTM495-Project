@@ -1,5 +1,6 @@
 import RatingStars from './RatingStars'
 import { useLanguage } from '../context/LanguageContext'
+import { Clock, Scissors } from 'lucide-react'
 
 
 export default function ServiceCard({ service, selected, onClick }) {
@@ -8,11 +9,17 @@ export default function ServiceCard({ service, selected, onClick }) {
     <div
       className={`service-card${selected ? ' selected' : ''}`}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick?.()}
     >
       <h3>{t(service.name)}</h3>
       <div className="service-meta">
         <span className="price">${service.price.toFixed(2)}</span>
-        <span className="duration">⏱ {service.duration} min</span>
+        <span className="duration" style={{ display:'inline-flex', alignItems:'center', gap:'0.3rem' }}>
+          <Clock size={12} aria-hidden="true" /> {service.duration} min
+        </span>
       </div>
     </div>
   )
@@ -25,17 +32,21 @@ export function BarberCard({ barber, selected, onClick }) {
       className={`card${selected ? ' selected' : ''}`}
       style={{ cursor:'pointer', borderColor: selected ? 'var(--gold)' : undefined, background: selected ? 'var(--gold-dim)' : undefined }}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick?.()}
     >
       <div style={{ display:'flex', alignItems:'center', gap:'0.8rem' }}>
         <div style={{
           width:52, height:52, borderRadius:'50%', overflow: 'hidden',
-          background:'linear-gradient(135deg,var(--gold),#8f7422)',
+          background:'linear-gradient(135deg,var(--gold),var(--gold-dark))',
           display:'flex', alignItems:'center', justifyContent:'center',
-          fontSize:'1.2rem', flexShrink:0, border: '2px solid var(--gold)'
+          flexShrink:0, border: '2px solid var(--gold)', color: '#000'
         }}>
-          {barber.user_id <= 3 ? 
+          {barber.user_id <= 3 ?
             <img src={`/images/avatar_${barber.user_id}.png`} alt={barber.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : '✂'}
+          : <Scissors size={22} aria-hidden="true" />}
         </div>
         <div>
           <div style={{ fontWeight:600 }}>{barber.name}</div>

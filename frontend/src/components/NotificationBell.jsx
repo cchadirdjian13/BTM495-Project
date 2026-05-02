@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { Bell } from 'lucide-react'
 
 
 export default function NotificationBell() {
@@ -25,13 +26,15 @@ export default function NotificationBell() {
     <div className="notif-wrap" ref={ref}>
       <button
         className="btn btn-ghost btn-sm"
-        style={{ fontSize:'1.2rem', padding:'0.4rem 0.6rem', position:'relative' }}
+        style={{ padding:'0.4rem 0.6rem', position:'relative', minWidth:'44px' }}
         onClick={() => setOpen(o => !o)}
-        title={t('notifications')}
+        aria-label={`${t('notifications')}${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+        aria-expanded={open}
+        aria-haspopup="true"
       >
-        🔔
+        <Bell size={20} aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+          <span className="notif-badge" aria-hidden="true">{unreadCount > 9 ? '9+' : unreadCount}</span>
         )}
       </button>
 

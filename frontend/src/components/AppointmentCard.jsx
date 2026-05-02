@@ -1,5 +1,6 @@
 import { appointmentsAPI } from '../api/api'
 import { useLanguage } from '../context/LanguageContext'
+import { CalendarDays, Clock, DollarSign, CreditCard, Star, Check, CheckCheck, X } from 'lucide-react'
 
 
 const STATUS_CLASS = {
@@ -39,31 +40,32 @@ export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, o
 
       {/* Details */}
       <div style={{ display:'flex', gap:'1.2rem', flexWrap:'wrap' }}>
-        <Detail icon="📅" text={fmt(appt.datetime)} />
-        <Detail icon="💈" text={`${appt.service?.duration || 0} min`} />
-        <Detail icon="💰" text={`$${appt.service?.price?.toFixed(2) || '0.00'}`} />
+        <Detail icon={<CalendarDays size={13} aria-hidden="true" />} text={fmt(appt.datetime)} />
+        <Detail icon={<Clock       size={13} aria-hidden="true" />} text={`${appt.service?.duration || 0} min`} />
+        <Detail icon={<DollarSign  size={13} aria-hidden="true" />} text={`$${appt.service?.price?.toFixed(2) || '0.00'}`} />
       </div>
 
       {/* Payment info */}
       {appt.payments.length > 0 && (
-        <div style={{ background:'var(--surface2)', borderRadius:'var(--radius-sm)', padding:'0.6rem 0.9rem', fontSize:'0.82rem' }}>
-          💳 {appt.payments[0].method} — ${appt.payments[0].amount.toFixed(2)}
+        <div style={{ background:'var(--surface2)', borderRadius:'var(--radius-sm)', padding:'0.6rem 0.9rem', fontSize:'0.82rem', display:'flex', alignItems:'center', gap:'0.4rem', flexWrap:'wrap' }}>
+          <CreditCard size={13} aria-hidden="true" />
+          {appt.payments[0].method} — ${appt.payments[0].amount.toFixed(2)}
           {appt.payments[0].tip > 0 && (
-            <span style={{ marginLeft:'0.4rem', color:'var(--gold)', fontSize:'0.78rem' }}>
+            <span style={{ color:'var(--gold)', fontSize:'0.78rem' }}>
               ({t('tip')}: ${appt.payments[0].tip.toFixed(2)})
             </span>
           )}
-          <span style={{ marginLeft:'0.6rem', color:'var(--success)' }}>{t('paid')}</span>
+          <span style={{ color:'var(--success)' }}>{t('paid')}</span>
         </div>
       )}
 
       {/* Actions */}
       <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', marginTop:'0.2rem' }}>
-        {canConfirm  && <button className="btn btn-success btn-sm" onClick={() => action(() => appointmentsAPI.confirm (appt.appointment_id))}>✓ {t('confirm')}</button>}
-        {canComplete && <button className="btn btn-primary btn-sm" onClick={() => action(() => appointmentsAPI.complete(appt.appointment_id))}>✔ {t('complete')}</button>}
-        {canPay      && <button className="btn btn-primary btn-sm" onClick={() => onPay(appt)}>💳 {t('pay')}</button>}
-        {canReview   && <button className="btn btn-ghost  btn-sm" onClick={() => onReview(appt)}>⭐ {t('leave_review')}</button>}
-        {canCancel   && <button className="btn btn-danger  btn-sm" onClick={() => action(() => appointmentsAPI.cancel (appt.appointment_id))}>✕ {t('cancel_appt')}</button>}
+        {canConfirm  && <button className="btn btn-success btn-sm" onClick={() => action(() => appointmentsAPI.confirm (appt.appointment_id))}><Check      size={14} aria-hidden="true" /> {t('confirm')}</button>}
+        {canComplete && <button className="btn btn-primary btn-sm" onClick={() => action(() => appointmentsAPI.complete(appt.appointment_id))}><CheckCheck size={14} aria-hidden="true" /> {t('complete')}</button>}
+        {canPay      && <button className="btn btn-primary btn-sm" onClick={() => onPay(appt)}><CreditCard size={14} aria-hidden="true" /> {t('pay')}</button>}
+        {canReview   && <button className="btn btn-ghost   btn-sm" onClick={() => onReview(appt)}><Star       size={14} aria-hidden="true" /> {t('leave_review')}</button>}
+        {canCancel   && <button className="btn btn-danger  btn-sm" onClick={() => action(() => appointmentsAPI.cancel  (appt.appointment_id))}><X          size={14} aria-hidden="true" /> {t('cancel_appt')}</button>}
       </div>
     </div>
   )
@@ -71,8 +73,8 @@ export default function AppointmentCard({ appt, isBarber, onRefresh, onReview, o
 
 function Detail({ icon, text }) {
   return (
-    <span style={{ fontSize:'0.82rem', color:'var(--muted)', display:'flex', alignItems:'center', gap:'0.3rem' }}>
-      {icon} {text}
+    <span style={{ fontSize:'0.82rem', color:'var(--muted)', display:'inline-flex', alignItems:'center', gap:'0.3rem' }}>
+      {icon}{text}
     </span>
   )
 }
